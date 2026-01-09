@@ -1,0 +1,15 @@
+const OPAQUE = 'rgba(17,17,17, 1)';
+const TRANSPARENT = 'rgba(17,17,17, .8)';
+
+export const EVENTS = {
+  EMIT: { CREATE_ROOM: 'CREATE_ROOM', JOIN_ROOM: 'JOIN_ROOM', SEND_MESSAGE: 'SEND_MESSAGE' },
+  ON: {
+    JOINED_ROOM: 'JOINED_ROOM',
+    MESSAGES: 'MESSAGES',
+    USER_ONLINE: 'USER_ONLINE',
+    USER_OFFLINE: 'USER_OFFLINE',
+    NEW_MESSAGE: 'NEW_MESSAGE',
+  },
+};
+
+export const constants = { OPAQUE, TRANSPARENT };
