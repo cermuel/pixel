@@ -31,7 +31,9 @@ const AuthScreen = () => {
         <Feather name="repeat" color={'white'} />
         <Text className="text-xl font-medium text-white">Continue with Google</Text>
       </Pressable>
-      <Pressable className="flex-row items-center justify-center gap-2.5 rounded-2xl bg-[#7878803A] py-3">
+      <Pressable
+        onPress={() => router.push('/signup')}
+        className="flex-row items-center justify-center gap-2.5 rounded-2xl bg-[#7878803A] py-3">
         <Feather name="repeat" color={'white'} />
         <Text className="text-xl font-medium text-white">Sign up with Email</Text>
       </Pressable>
