@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Constants from 'expo-constants';
+import { RootState } from '../store';
 
 const BASE_URI: string = 'https://api.unsplash.com';
 
@@ -9,8 +10,9 @@ const API_KEY: string = Constants.expoConfig?.extra?.SPLASH_ACCESS_KEY;
 
 const customBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URI,
-  prepareHeaders: async (headers) => {
-    const token = await AsyncStorage.getItem('token');
+  prepareHeaders: async (headers, { getState }) => {
+    const state = getState() as RootState;
+    const token = state.authState.token || (await AsyncStorage.getItem('token'));
 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);

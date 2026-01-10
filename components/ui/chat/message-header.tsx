@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -10,12 +10,12 @@ const MessageHeader = ({ name }: { name: string }) => {
       style={{ padding: 16 }}
       className=" z-10 w-full flex-row items-center gap-4 border-b border-b-[#222]">
       <>
-        <Pressable
+        <TouchableOpacity
           onPress={() => {
             router.back();
           }}>
           <Ionicons name="chevron-back" size={20} color={'white'} />
-        </Pressable>
+        </TouchableOpacity>
         <SvgUri
           uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${name || 'Guest'}`}
           width={35}

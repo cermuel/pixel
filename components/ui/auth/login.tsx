@@ -14,9 +14,10 @@ import { Toast } from 'toastify-react-native';
 import { Error } from '@/types/slices/auth';
 import useAuth from '@/context/useAuth';
 import { router } from 'expo-router';
+import ToastManager from 'toastify-react-native';
 
 const LoginScreen = () => {
-  const { setToken, setIsAuth } = useAuth();
+  const { setToken, setIsAuth, setUser } = useAuth();
   const [login, { isLoading }] = useLoginMutation();
   const [loginDetails, setLoginDetails] = useState({ emailOrPhone: '', password: '' });
   const [showPassword, togglePassword] = useState(false);
@@ -24,7 +25,6 @@ const LoginScreen = () => {
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
   const handleLogin = async () => {
-    console.log({ loginDetails });
     if (!loginDetails.emailOrPhone || !loginDetails.password) return;
     try {
       const response = await login({
@@ -34,6 +34,7 @@ const LoginScreen = () => {
       }).unwrap();
 
       setToken(response.token);
+      setUser(response.data);
       setIsAuth(true);
       Toast.success('Login successful');
       router.dismiss();
@@ -84,6 +85,8 @@ const LoginScreen = () => {
             <Text className="text-xl font-medium">Login</Text>
           )}
         </Pressable>
+
+        <ToastManager useModal={true} theme="dark" />
       </View>
     </TouchableWithoutFeedback>
   );

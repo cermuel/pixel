@@ -1,53 +1,65 @@
-import { useEffect, useState } from 'react';
 import { EVENTS } from '@/utils/constants';
 import useSocket from '@/context/chat-socket';
+import { router } from 'expo-router';
+import { ChatData } from '@/types/slices/user';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { NewMessage } from '@/types/chat-socket';
+import useAuth from '@/context/useAuth';
 
-const useChat = ({ room: roomString, name }: { room: string; name: string }) => {
-  const room = Number(roomString);
+const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>> }) => {
   const { socket } = useSocket();
-  const [messages, setMessages] = useState<NewMessage[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!socket) return;
-    socket.emit(EVENTS.EMIT.JOIN_ROOM, { room, name });
-  }, [room, name]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleMessages = ({ messages: initMessages }: any) => {
-      setMessages(initMessages);
-    };
+    if (!socket || !setChats) return;
 
     const handleNewMessage = (message: NewMessage) => {
-      console.log('handled new message');
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === message.id)) return prev;
-        return [...prev, message];
+      setChats((prev) => {
+        return prev.map((c) => {
+          if (c.id != message.chatId) return c;
+
+          const updatedChat: ChatData = {
+            ...c,
+            messages: [message],
+          };
+          return updatedChat;
+        });
       });
     };
 
-    socket.on(EVENTS.ON.MESSAGES, handleMessages);
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
 
     return () => {
-      socket.off(EVENTS.ON.MESSAGES, handleMessages);
       socket.off(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
     };
-  }, [socket]);
+  }, [socket, setChats]);
 
-  const sendMessage = ({ message }: { message: string }) => {
+  const createRoom = (selectedUser: { id: number; name: string }) => {
     if (!socket) return;
-    const messageToSend = {
-      roomId: room,
-      message,
-    };
-    socket.emit(EVENTS.EMIT.SEND_MESSAGE, messageToSend, () => {
-      console.log('message sent successdfully');
-    });
+    socket.emit(
+      EVENTS.EMIT.CREATE_ROOM,
+      {
+        receiverId: selectedUser.id,
+        name: selectedUser.name,
+      },
+      (room: any) => {
+        router.dismiss();
+        setTimeout(() => {
+          router.push({
+            pathname: '/message',
+            params: { id: room.id, name: selectedUser.name },
+          });
+        }, 50);
+      }
+    );
   };
-  return { messages, sendMessage };
+
+  const joinRoom = ({ room }: { room: number }) => {
+    if (!socket || !user) return;
+    socket.emit(EVENTS.EMIT.JOIN_ROOM, { room, name: user.email || user.phone });
+  };
+
+  return { createRoom, joinRoom };
 };
 
 export default useChat;
