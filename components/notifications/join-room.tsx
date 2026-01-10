@@ -121,10 +121,6 @@ const JoinRoom = ({ name, room }: { name: string; room: string }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setVisible(false);
-                    // router.push({
-                    //   pathname: '/details',
-                    //   params: { id: 8 },
-                    // });
                   }}
                   className={`mt-2 flex-1 items-center rounded-full bg-white py-4`}>
                   <Text className={`text-lg font-bold text-yellow-950`}>View Event</Text>

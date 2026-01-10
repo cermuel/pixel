@@ -4,11 +4,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   TextInput,
-  FlatList,
   Pressable,
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  FlatList,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,11 +22,19 @@ import EvilIcons from '@expo/vector-icons/EvilIcons';
 import ChatSkeleton from '../ui/chat/chat-skeleton';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ChatItem from '../ui/chat/chat-item';
+import { ChatData } from '@/types/slices/user';
+import useChat from '@/hooks/useChat';
+import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
+
+const AnimatedFlatlist = Animated.createAnimatedComponent(FlatList);
 
 const ChatScreenComponent = () => {
   const [query, setQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [chats, setChats] = useState<ChatData[]>([]);
 
   const { setIsAuth, setUser, setToken } = useAuth();
+  const { joinRoom } = useChat({ setChats });
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useProfileQuery({});
   const {
@@ -36,7 +44,12 @@ const ChatScreenComponent = () => {
     error,
     refetch,
   } = useChatsQuery({ query: useDebounce(query, 500) });
-  const [refreshing, setRefreshing] = useState(false);
+
+  const user = data?.data;
+
+  const onRefresh = async () => {
+    await refetch();
+  };
 
   const logout = () => {
     router.replace('/home');
@@ -45,16 +58,19 @@ const ChatScreenComponent = () => {
     setToken(null);
   };
 
-  const user = data?.data;
-
-  const onRefresh = async () => {
-    await refetch();
-  };
+  useEffect(() => {
+    if (usersData) setChats(usersData.data);
+  }, [usersData]);
 
   useEffect(() => {
     setRefreshing(isFetching);
   }, [isFetching]);
 
+  const sortedChats = [...(chats || [])].sort(
+    (a, b) =>
+      new Date(b?.messages[0]?.updatedAt || b?.messages[0]?.createdAt || 0).getTime() -
+      new Date(a?.messages[0]?.updatedAt || a?.messages[0]?.createdAt || 0).getTime()
+  );
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#111]">
@@ -96,12 +112,21 @@ const ChatScreenComponent = () => {
           <View className="flex-row gap-4">
             <View className="flex-1 flex-row items-center gap-2 rounded-lg bg-black/30 p-2.5">
               <EvilIcons name="search" size={20} color="white" />
-              <TextInput
-                className="flex-1 text-white"
-                placeholderTextColor={'#CCC'}
-                placeholder="Search chats..."
-                onChangeText={(text) => setQuery(text)}
-              />
+              <View className="relative flex-1">
+                <TextInput
+                  className="flex-1 text-white"
+                  onChangeText={(text) => setQuery(text)}
+                  value={query}
+                  style={{ padding: 0 }}
+                />
+                {!query && (
+                  <Text
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-[#CCC]"
+                    style={{ pointerEvents: 'none' }}>
+                    Search chats...
+                  </Text>
+                )}
+              </View>
             </View>
             <Pressable
               onPress={() => router.push('/new-chat')}
@@ -125,16 +150,23 @@ const ChatScreenComponent = () => {
                   />
                 }
                 className="flex-1"
-                data={usersData.data}
+                contentContainerClassName="gap-3"
+                data={sortedChats}
                 keyExtractor={(item) => item.id.toString()}
                 ListEmptyComponent={
                   <View>
                     <Text className="text-center font-medium text-[#DDD]">No users found</Text>
                   </View>
                 }
-                renderItem={({ item }) => {
+                renderItem={({ item, index }) => {
                   const receiver = item.receiverId !== user?.id ? item.receiver : item.sender;
-                  return <ChatItem item={item} receiver={receiver} />;
+                  return (
+                    <Animated.View
+                      entering={FadeInDown.delay(index * 50).springify()}
+                      layout={Layout.springify()}>
+                      <ChatItem item={item} receiver={receiver} joinRoom={joinRoom} />
+                    </Animated.View>
+                  );
                 }}
               />
             ) : error ? (

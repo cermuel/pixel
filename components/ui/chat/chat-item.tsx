@@ -1,11 +1,23 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import { SvgUri } from 'react-native-svg';
 import { helpers } from '@/utils/helpers';
 import { ChatData } from '@/types/slices/user';
 
-const ChatItem = ({ item, receiver }: { item: ChatData; receiver: ChatData['receiver'] }) => {
+const ChatItem = ({
+  item,
+  receiver,
+  joinRoom,
+}: {
+  item: ChatData;
+  receiver: ChatData['receiver'];
+  joinRoom: ({}: { room: number }) => void;
+}) => {
+  useEffect(() => {
+    joinRoom({ room: item.id });
+  }, [item]);
+
   return (
     <TouchableOpacity
       onPress={() => {
@@ -19,12 +31,11 @@ const ChatItem = ({ item, receiver }: { item: ChatData; receiver: ChatData['rece
         });
       }}
       className="flex-row items-center gap-4">
-      <View style={{ width: 50, height: 50, borderRadius: 25, overflow: 'hidden' }}>
+      <View style={{ width: 45, height: 45, borderRadius: 22.5, overflow: 'hidden' }}>
         <SvgUri
           uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${receiver.name || 'Guest'}`}
-          width={50}
-          height={50}
-          style={{ borderRadius: 30, overflow: 'hidden' }}
+          width={45}
+          height={45}
         />
       </View>
       <View className="">

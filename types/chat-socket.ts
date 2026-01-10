@@ -2,6 +2,7 @@ export interface NewMessage {
   id: number;
   chatId: number;
   senderId: number;
+  replyTo: Omit<NewMessage, 'replyTo' | 'reactions'> | null;
   replyToId: number | null;
   message: string;
   createdAt: string;

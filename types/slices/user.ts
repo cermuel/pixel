@@ -59,19 +59,6 @@ interface Receiver {
   createdAt: string;
 }
 
-interface Message {
-  id: number;
-  chatId: number;
-  senderId: number;
-  replyToId: any;
-  message: string;
-  createdAt: string;
-  updatedAt: any;
-  deletedAt: any;
-  reactions: any[];
-  status: string;
-}
-
 export interface ChatData {
   id: number;
   senderId: number;
@@ -79,7 +66,7 @@ export interface ChatData {
   createdAt: string;
   receiver: Receiver;
   sender: Receiver;
-  messages: Message[];
+  messages: NewMessage[];
 }
 
 export interface UserResponse {

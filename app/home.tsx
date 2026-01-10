@@ -10,14 +10,11 @@ import { useDebounce } from '@/hooks/useDebounce';
 import SearchView from '@/components/home/search-view';
 import { SvgUri } from 'react-native-svg';
 import { useRouter } from 'expo-router';
-import { events } from '@/utils/events';
-import useSocket from '@/context/chat-socket';
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 type Tab = 'Explore' | 'For You';
 const tabs: Tab[] = ['Explore', 'For You'];
 const Home = () => {
-  const { socket } = useSocket();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -37,7 +34,6 @@ const Home = () => {
             <AnimatedTouchableOpacity
               onPress={() => {
                 router.push('/profile');
-                // socket?.emit(events.JOIN_ROOM, { room: 'room001', name: 'Samuel Ngene' });
               }}
               className={
                 'h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#11111177]'

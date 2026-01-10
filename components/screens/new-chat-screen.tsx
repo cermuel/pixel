@@ -1,35 +1,27 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  TextInput,
-  FlatList,
-  Pressable,
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, FlatList, Pressable } from 'react-native';
 import React, { useState } from 'react';
 import { SvgUri } from 'react-native-svg';
 import { router } from 'expo-router';
 import { useUsersQuery } from '@/services/user/userSlice';
 import { useDebounce } from '@/hooks/useDebounce';
 import ChatSkeleton from '../ui/chat/chat-skeleton';
-
 import { UserData } from '@/types/slices/user';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useSocket from '@/context/chat-socket';
-import { EVENTS } from '@/utils/constants';
+import useChat from '@/hooks/useChat';
 
 const NewChatScreenComponent = () => {
-  const { socket } = useSocket();
   const [query, setQuery] = useState('');
+  const [selectedUser, setUser] = useState<UserData | null>(null);
 
+  const { socket } = useSocket();
+  const { createRoom } = useChat({});
   const {
     data: usersData,
     isLoading: loadingChats,
     isFetching,
     error,
   } = useUsersQuery({ query: useDebounce(query, 500) });
-  const [selectedUser, setUser] = useState<UserData | null>(null);
 
   const fetchingUsers = isFetching || loadingChats;
 
@@ -38,22 +30,7 @@ const NewChatScreenComponent = () => {
 
     const combinedChats = [...selectedUser.receivedChats, ...selectedUser.sentChats];
     if (combinedChats.length == 0) {
-      socket.emit(
-        EVENTS.EMIT.CREATE_ROOM,
-        {
-          receiverId: selectedUser.id,
-          name: selectedUser.name,
-        },
-        (room: any) => {
-          router.dismiss();
-          setTimeout(() => {
-            router.push({
-              pathname: '/message',
-              params: { id: room.id, name: selectedUser.name },
-            });
-          }, 50);
-        }
-      );
+      createRoom(selectedUser);
     } else {
       const chat = combinedChats[0];
       router.dismiss();

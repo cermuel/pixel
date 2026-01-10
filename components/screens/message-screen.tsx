@@ -5,11 +5,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { helpers } from '@/utils/helpers';
 import SenderMessage from '../ui/chat/sender-message';
 import ReceiverMessage from '../ui/chat/receiver-message';
-import useChat from '@/hooks/useChat';
 import MessageHeader from '../ui/chat/message-header';
-import MessageFooter from '../ui/chat/message-footer';
+import MessageFooter, { MessageFooterRef } from '../ui/chat/message-footer';
+import useMessages from '@/hooks/useMessages';
+import { NewMessage } from '@/types/chat-socket';
 
 const MessageScreenComponent = () => {
+  const footerRef = useRef<MessageFooterRef>(null);
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<any>(null);
   const { id, receiverId, name } = useLocalSearchParams();
@@ -20,12 +22,19 @@ const MessageScreenComponent = () => {
     }
   };
 
-  const { messages, sendMessage } = useChat({ room: id as string, name: name as string });
+  const { messages, sendMessage } = useMessages({ room: id as string });
   const reversedMessages = [...messages].reverse();
+
+  const [text, setText] = useState<string>('');
+  const [messageToReply, setMessageToReply] = useState<NewMessage | null>(null);
 
   useEffect(() => {
     scrollToTop();
   }, [messages]);
+
+  useEffect(() => {
+    if (messageToReply && footerRef) footerRef.current?.focusInput();
+  }, [messageToReply]);
 
   return (
     <SafeAreaView
@@ -65,12 +74,16 @@ const MessageScreenComponent = () => {
                       message={item}
                       showTimestamp={showTimestamp}
                       currentTime={currentTime}
+                      handleSwipe={() => setMessageToReply(item)}
+                      name={name as string}
                     />
                   ) : (
                     <ReceiverMessage
                       message={item}
                       showTimestamp={showTimestamp}
                       currentTime={currentTime}
+                      handleSwipe={() => setMessageToReply(item)}
+                      name={name as string}
                     />
                   )}
                 </>
@@ -78,7 +91,15 @@ const MessageScreenComponent = () => {
             }}
           />
 
-          <MessageFooter sendMessage={sendMessage} />
+          <MessageFooter
+            messageToReply={messageToReply}
+            setMessageToReply={setMessageToReply}
+            ref={footerRef}
+            sendMessage={sendMessage}
+            setText={setText}
+            text={text}
+            name={name as string}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

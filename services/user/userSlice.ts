@@ -1,9 +1,8 @@
 import { apiSlice } from '../api/apiSlice';
 import { ChatResponse, ProfileResponse, UserResponse } from '@/types/slices/user';
 
-const BASE_URI =
-  // 'http://192.168.100.152:4444';
-  'https://pixel-server-pule.onrender.com';
+const BASE_URI = 'http://192.168.100.152:4444';
+// 'https://pixel-server-pule.onrender.com';
 
 const authSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
