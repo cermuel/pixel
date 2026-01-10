@@ -7,6 +7,8 @@ export const EVENTS = {
     JOIN_ROOM: 'JOIN_ROOM',
     SEND_MESSAGE: 'SEND_MESSAGE',
     MARK_AS_READ: 'MARK_AS_READ',
+    REACT_TO_MESSAGE: 'REACT_TO_MESSAGE',
+    UNREACT_TO_MESSAGE: 'UNREACT_TO_MESSAGE',
   },
   ON: {
     JOINED_ROOM: 'JOINED_ROOM',
@@ -16,7 +18,11 @@ export const EVENTS = {
     NEW_MESSAGE: 'NEW_MESSAGE',
     NEW_CHAT_CREATED: 'NEW_CHAT_CREATED',
     MESSAGES_READ: 'MESSAGES_READ',
+    MESSAGE_REACTED: 'MESSAGE_REACTED',
+    MESSAGE_UNREACTED: 'MESSAGE_UNREACTED',
   },
 };
 
-export const constants = { OPAQUE, TRANSPARENT };
+const DEFAULT_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+export const constants = { OPAQUE, TRANSPARENT, DEFAULT_EMOJIS };

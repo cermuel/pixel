@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { EVENTS } from '@/utils/constants';
 import useSocket from '@/context/chat-socket';
-import { NewMessage } from '@/types/chat-socket';
+import { NewMessage, Reaction } from '@/types/chat-socket';
 import useAuth from '@/context/useAuth';
 
 const useMessages = ({ room: roomString }: { room: string }) => {
@@ -64,14 +64,43 @@ const useMessages = ({ room: roomString }: { room: string }) => {
       );
     };
 
+    const handleReactionAdded = (reaction: Reaction) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === reaction.messageId
+            ? {
+                ...m,
+                reactions: [...(m.reactions || []).filter((r) => r.id !== reaction.id), reaction],
+              }
+            : m
+        )
+      );
+    };
+    const handleReactionRemoved = (reaction: Reaction) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === reaction.messageId
+            ? {
+                ...m,
+                reactions: m.reactions?.filter((r) => r.id !== reaction.id) || [],
+              }
+            : m
+        )
+      );
+    };
+
     socket.on(EVENTS.ON.MESSAGES, handleMessages);
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
     socket.on(EVENTS.ON.MESSAGES_READ, handleMessagesRead);
+    socket.on(EVENTS.ON.MESSAGE_REACTED, handleReactionAdded);
+    socket.on(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
 
     return () => {
       socket.off(EVENTS.ON.MESSAGES, handleMessages);
       socket.off(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
       socket.off(EVENTS.ON.MESSAGES_READ, handleMessagesRead);
+      socket.off(EVENTS.ON.MESSAGE_REACTED, handleReactionAdded);
+      socket.off(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
     };
   }, [socket, user]);
 
@@ -105,7 +134,16 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     socket.emit(EVENTS.EMIT.SEND_MESSAGE, messageToSend, () => {});
   };
 
-  return { messages, sendMessage };
+  const addReaction = ({ messageId, reaction }: { messageId: number; reaction: string }) => {
+    if (!socket) return;
+    socket.emit(EVENTS.EMIT.REACT_TO_MESSAGE, { messageId, reaction, roomId: room }, () => {});
+  };
+  const removeReaction = ({ id }: { id: number }) => {
+    if (!socket) return;
+    socket.emit(EVENTS.EMIT.UNREACT_TO_MESSAGE, { id, roomId: room }, () => {});
+  };
+
+  return { messages, sendMessage, addReaction, removeReaction };
 };
 
 export default useMessages;

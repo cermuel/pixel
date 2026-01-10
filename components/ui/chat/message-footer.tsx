@@ -9,6 +9,7 @@ import ReplySection from './reply-section';
 
 export interface MessageFooterRef {
   focusInput: () => void;
+  isFocused: () => boolean;
 }
 
 interface MessageFooterProps {
@@ -17,17 +18,34 @@ interface MessageFooterProps {
   text: string;
   messageToReply: NewMessage | null;
   setMessageToReply: Dispatch<NewMessage | null>;
+  messageToEdit: NewMessage | null;
+  setMessageToEdit: Dispatch<NewMessage | null>;
   name: string;
+  setFocus: Dispatch<boolean>;
 }
 
 const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
-  ({ sendMessage, setText, text, messageToReply, setMessageToReply, name }, ref) => {
+  (
+    {
+      sendMessage,
+      setText,
+      text,
+      messageToReply,
+      setMessageToReply,
+      name,
+      messageToEdit,
+      setMessageToEdit,
+      setFocus,
+    },
+    ref
+  ) => {
     const inputRef = useRef<TextInput>(null);
 
     useImperativeHandle(ref, () => ({
       focusInput: () => {
         inputRef.current?.focus();
       },
+      isFocused: () => inputRef.current?.isFocused() || false,
     }));
 
     return (
@@ -47,9 +65,20 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
             ref={inputRef}
             onChangeText={(e) => setText(e)}
             value={text}
+            onFocus={() => setFocus(true)}
+            onBlur={() => setFocus(false)}
             autoCapitalize="none"
             className="flex-1 rounded-full bg-white/10 p-2 px-4 font-medium text-white"
           />
+          {messageToEdit && (
+            <TouchableOpacity
+              onPress={() => {
+                setText('');
+                setMessageToEdit(null);
+              }}>
+              <Ionicons name="close-sharp" size={24} color="white" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
               if (text.trim()) {

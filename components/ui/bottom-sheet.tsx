@@ -1,5 +1,4 @@
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-
 import React, { useEffect } from 'react';
 import {
   Dimensions,
@@ -9,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   View,
   ViewStyle,
+  Platform,
 } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
@@ -77,7 +77,6 @@ const BottomSheetContent = ({
           </View>
         </TouchableWithoutFeedback>
       )}
-
       {title && (
         <View
           style={{
@@ -90,7 +89,6 @@ const BottomSheetContent = ({
           </Text>
         </View>
       )}
-
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -134,6 +132,7 @@ export function BottomSheet({
   const opacity = useSharedValue(0);
   const currentSnapIndex = useSharedValue(0);
   const keyboardHeightSV = useSharedValue(0);
+  const baseSnapPoint = useSharedValue(0);
 
   const snapPointsHeights = snapPoints.map((point) => -SCREEN_HEIGHT * point);
   const defaultHeight = snapPointsHeights[0];
@@ -143,6 +142,7 @@ export function BottomSheet({
   useEffect(() => {
     if (isVisible) {
       setModalVisible(true);
+      baseSnapPoint.value = defaultHeight;
       translateY.value = withSpring(defaultHeight, {
         damping: 50,
         stiffness: 400,
@@ -159,37 +159,35 @@ export function BottomSheet({
     }
   }, [isVisible, defaultHeight]);
 
-  // Function to animate the sheet to a specific destination
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const currentBase = snapPointsHeights[currentSnapIndex.value];
+    baseSnapPoint.value = currentBase;
+
+    if (isKeyboardVisible && keyboardHeight > 0) {
+      keyboardHeightSV.value = keyboardHeight;
+      const destination = currentBase - keyboardHeight;
+      translateY.value = withSpring(destination, {
+        damping: 50,
+        stiffness: 400,
+      });
+    } else {
+      keyboardHeightSV.value = 0;
+      translateY.value = withSpring(currentBase, {
+        damping: 50,
+        stiffness: 400,
+      });
+    }
+  }, [keyboardHeight, isKeyboardVisible, isVisible]);
+
   const scrollTo = (destination: number) => {
     'worklet';
     translateY.value = withSpring(destination, { damping: 50, stiffness: 400 });
   };
 
-  // --- START: NEW KEYBOARD HANDLING LOGIC ---
-  useEffect(() => {
-    // Update the shared value whenever keyboardHeight changes
-    keyboardHeightSV.value = keyboardHeight;
-
-    // Only adjust position if the sheet is currently visible
-    if (isVisible) {
-      const currentSnapHeight = snapPointsHeights[currentSnapIndex.value];
-      let destination: number;
-
-      if (isKeyboardVisible) {
-        // Keyboard is open, move sheet up by keyboard height
-        destination = currentSnapHeight - keyboardHeight;
-      } else {
-        // Keyboard is closed, return to original snap point
-        destination = currentSnapHeight;
-      }
-      scrollTo(destination);
-    }
-  }, [keyboardHeight, isKeyboardVisible, isVisible]);
-  // --- END: NEW KEYBOARD HANDLING LOGIC ---
-
   const findClosestSnapPoint = (currentY: number) => {
     'worklet';
-    // Adjust the currentY by the keyboard height to find the original snap point
     const adjustedY = currentY + keyboardHeightSV.value;
 
     let closest = snapPointsHeights[0];
@@ -205,14 +203,19 @@ export function BottomSheet({
         closestIndex = i;
       }
     }
+
     currentSnapIndex.value = closestIndex;
+    baseSnapPoint.value = closest;
     return closest;
   };
 
   const handlePress = () => {
     const nextIndex = (currentSnapIndex.value + 1) % snapPointsHeights.length;
     currentSnapIndex.value = nextIndex;
-    const destination = snapPointsHeights[nextIndex] - keyboardHeightSV.value;
+    const baseDestination = snapPointsHeights[nextIndex];
+    baseSnapPoint.value = baseDestination;
+
+    const destination = baseDestination - keyboardHeightSV.value;
     scrollTo(destination);
   };
 
@@ -232,6 +235,7 @@ export function BottomSheet({
     })
     .onUpdate((event) => {
       const newY = context.value.y + event.translationY;
+
       if (newY <= 0 && newY >= MAX_TRANSLATE_Y) {
         translateY.value = newY;
       }
@@ -245,9 +249,8 @@ export function BottomSheet({
         return;
       }
 
-      // Find the closest original snap point
       const closestSnapPoint = findClosestSnapPoint(currentY);
-      // Calculate the final destination, accounting for the keyboard height
+
       const finalDestination = closestSnapPoint - keyboardHeightSV.value;
       scrollTo(finalDestination);
     });
@@ -277,7 +280,6 @@ export function BottomSheet({
           <TouchableWithoutFeedback onPress={handleBackdropPress}>
             <Animated.View style={{ flex: 1 }} />
           </TouchableWithoutFeedback>
-
           {disablePanGesture ? (
             <BottomSheetContent
               children={children}
