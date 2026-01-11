@@ -166,7 +166,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     socket.emit(EVENTS.EMIT.STOP_TYPING, { roomId: room }, () => {});
   };
 
-  return { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping };
+  return { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping, typing };
 };
 
 export default useMessages;

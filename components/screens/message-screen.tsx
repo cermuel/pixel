@@ -11,6 +11,7 @@ import { NewMessage } from '@/types/chat-socket';
 import MessageMenu from '../ui/chat/message-menu';
 import ViewReactions from '../ui/chat/view-reactions';
 import { EmojiPicker } from '../shared/emoji-picker';
+import TypingIndicator from '../ui/chat/typing-indicator';
 
 const MessageScreenComponent = () => {
   const footerRef = useRef<MessageFooterRef>(null);
@@ -24,9 +25,10 @@ const MessageScreenComponent = () => {
     }
   };
 
-  const { messages, sendMessage, addReaction, removeReaction } = useMessages({
-    room: id as string,
-  });
+  const { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping, typing } =
+    useMessages({
+      room: id as string,
+    });
   const reversedMessages = [...messages].reverse();
 
   const [focus, setFocus] = useState(false);
@@ -176,6 +178,7 @@ const MessageScreenComponent = () => {
               }}
             />
           )}
+          {typing && <TypingIndicator />}
 
           <MessageFooter
             messageToReply={messageToReply}
@@ -188,6 +191,8 @@ const MessageScreenComponent = () => {
             text={text}
             name={name as string}
             setFocus={setFocus}
+            startTyping={startTyping}
+            stopTyping={stopTyping}
           />
           <View style={{ height: focus ? 0 : insets.bottom }} />
         </View>
