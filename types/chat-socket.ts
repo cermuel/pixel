@@ -8,6 +8,13 @@ export interface NewMessage {
   createdAt: string;
   updatedAt: string | null;
   deletedAt: string | null;
-  reactions: string[];
+  reactions: Reaction[];
   status?: 'PENDING' | 'SENT' | 'READ' | undefined;
+}
+
+export interface Reaction {
+  id: number;
+  messageId: number;
+  reaction: string;
+  userId: number;
 }

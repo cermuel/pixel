@@ -40,9 +40,13 @@ const ChatItem = ({
       </View>
       <View className="">
         <Text className="text-base font-bold text-white">{receiver.name}</Text>
-        <Text className="text-sm text-white">
-          {item?.messages[0]?.message || 'Click to start a chat'}
-        </Text>
+        {item.isTyping ? (
+          <Text className="text-sm text-white">{item.typingUser} is typing...</Text>
+        ) : (
+          <Text className="text-sm text-white">
+            {item?.messages[0]?.message || 'Click to start a chat'}
+          </Text>
+        )}
       </View>
       <Text className="ml-auto text-xs font-semibold text-white">
         {item.messages?.[0]

@@ -26,11 +26,47 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
         });
       });
     };
+    const handleTyping = (typingData: { name: string; userId: number; roomId: number }) => {
+      setChats((prev) => {
+        return prev.map((c) => {
+          if (c.id != typingData.roomId) return c;
+
+          const updatedChat: ChatData = {
+            ...c,
+            isTyping: true,
+            typingUser: typingData.name,
+          };
+
+          return updatedChat;
+        });
+      });
+    };
+
+    const handleTypingStopped = (typingData: { name: string; userId: number; roomId: number }) => {
+      setChats((prev) => {
+        return prev.map((c) => {
+          if (c.id != typingData.roomId) return c;
+
+          const updatedChat: ChatData = {
+            ...c,
+            isTyping: false,
+            typingUser: undefined,
+          };
+          return updatedChat;
+        });
+      });
+    };
 
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
 
+    socket.on(EVENTS.ON.USER_TYPING, handleTyping);
+    socket.on(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
+
     return () => {
       socket.off(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
+
+      socket.off(EVENTS.ON.USER_TYPING, handleTyping);
+      socket.off(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
     };
   }, [socket, setChats]);
 

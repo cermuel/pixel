@@ -71,6 +71,7 @@ const ChatScreenComponent = () => {
       new Date(b?.messages[0]?.updatedAt || b?.messages[0]?.createdAt || 0).getTime() -
       new Date(a?.messages[0]?.updatedAt || a?.messages[0]?.createdAt || 0).getTime()
   );
+
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#111]">

@@ -67,6 +67,8 @@ export interface ChatData {
   receiver: Receiver;
   sender: Receiver;
   messages: NewMessage[];
+  isTyping?: boolean;
+  typingUser?: string;
 }
 
 export interface UserResponse {
