@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import React, { useRef } from 'react';
+import React, { Dispatch, useRef } from 'react';
 import { NewMessage } from '@/types/chat-socket';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -19,12 +19,14 @@ const ReceiverMessage = ({
   name,
   onLongPress,
   isPreview = false,
+  setMessageToView,
 }: {
   message: NewMessage;
   handleSwipe?: () => void;
   name: string;
   onLongPress?: (messageId: number, x: number, y: number, width: number, height: number) => void;
   isPreview?: boolean;
+  setMessageToView?: Dispatch<NewMessage | null>;
 }) => {
   const messageRef = useRef<View>(null);
   const translateX = useSharedValue(0);
@@ -74,7 +76,7 @@ const ReceiverMessage = ({
 
   return (
     <View
-      className={`relative ${message.reactions.length > 0 && !isPreview && 'pt-4'}`}
+      className={`relative ${message.reactions?.length > 0 && !isPreview && 'pt-4'}`}
       ref={messageRef}>
       <View className="w-full">
         <GestureDetector gesture={composedGesture}>
@@ -84,16 +86,18 @@ const ReceiverMessage = ({
                 <ReplySection messageToReply={message.replyTo} name={name} mode="RECEIVER" />
               )}
               <Text className="px-2 pb-0 pt-1 text-white">{message.message}</Text>
-              {message.reactions.length > 0 && !isPreview && (
+              {message.reactions?.length > 0 && !isPreview && (
                 <Pressable
-                  onPress={showMenuHandler}
+                  onPress={() => {
+                    if (setMessageToView) setMessageToView(message);
+                  }}
                   className="absolute -top-4 left-4 flex-row gap-1 rounded-full bg-[#555] p-[3px] px-[5px]">
-                  {message.reactions.map((r) => (
+                  {message.reactions?.map((r) => (
                     <Text key={r.id}>{r.reaction}</Text>
                   ))}
-                  {message.reactions.length > 1 && (
+                  {message.reactions?.length > 1 && (
                     <Text className="text-sm font-medium text-[#DDD]">
-                      {message.reactions.length}
+                      {message.reactions?.length}
                     </Text>
                   )}
                 </Pressable>

@@ -1,7 +1,13 @@
 export interface LoginResponse {
   message: string;
   token: string;
-  data: { userId: string | number; phone: string; role: string; email: string | null };
+  data: {
+    userId: string | number;
+    phone: string;
+    role: string;
+    email: string | null;
+    name: string;
+  };
 }
 export interface LoginPayload {
   email?: string;

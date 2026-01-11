@@ -144,13 +144,13 @@ export function BottomSheet({
       setModalVisible(true);
       baseSnapPoint.value = defaultHeight;
       translateY.value = withSpring(defaultHeight, {
-        damping: 50,
+        damping: 70,
         stiffness: 400,
       });
       opacity.value = withTiming(1, { duration: 300 });
       currentSnapIndex.value = 0;
     } else {
-      translateY.value = withSpring(0, { damping: 50, stiffness: 400 });
+      translateY.value = withSpring(0, { damping: 70, stiffness: 400 });
       opacity.value = withTiming(0, { duration: 300 }, (finished) => {
         if (finished) {
           runOnJS(setModalVisible)(false);

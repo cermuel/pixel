@@ -39,7 +39,7 @@ const LoginScreen = () => {
       Toast.success('Login successful');
       router.dismiss();
       setTimeout(() => {
-        router.replace('/chat');
+        router.replace('/home');
       }, 50);
     } catch (initError) {
       console.log({ initError });
@@ -86,7 +86,7 @@ const LoginScreen = () => {
           )}
         </Pressable>
 
-        <ToastManager useModal={true} theme="dark" />
+        <ToastManager theme="dark" />
       </View>
     </TouchableWithoutFeedback>
   );

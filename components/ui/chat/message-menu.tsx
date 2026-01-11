@@ -10,7 +10,6 @@ import SenderMessage from './sender-message';
 import ReceiverMessage from './receiver-message';
 import { BlurView } from 'expo-blur';
 import Feather from '@expo/vector-icons/Feather';
-import { EmojiPicker } from '@/components/shared/emoji-picker';
 
 export const MessageMenu = ({
   visible,
@@ -23,6 +22,8 @@ export const MessageMenu = ({
   setMessageToReply,
   setMessageToEdit,
   setMessageToDelete,
+  toggleEmojiModal,
+  showEmojiModal,
 }: {
   visible: boolean;
   message: NewMessage | null;
@@ -35,12 +36,12 @@ export const MessageMenu = ({
   setMessageToDelete: Dispatch<NewMessage | null>;
   name: string;
   room: string;
+  showEmojiModal: boolean;
+  toggleEmojiModal: Dispatch<boolean>;
 }) => {
   const { user } = useAuth();
   const menuOpacity = useSharedValue(0);
   const menuScale = useSharedValue(0.8);
-
-  const [showEmojiModal, toggleEmojiModal] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -158,15 +159,6 @@ export const MessageMenu = ({
             <Ionicons name="copy-outline" size={17} color="#AAA" />
             <Text className="text-lg text-white">Copy</Text>
           </Pressable>
-
-          <EmojiPicker
-            isVisible={showEmojiModal}
-            onClose={() => toggleEmojiModal(false)}
-            onEmojiSelect={(emoji) => {
-              handleReaction(emoji);
-              toggleEmojiModal(false);
-            }}
-          />
 
           {message.senderId == user?.userId && (
             <>

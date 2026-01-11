@@ -9,6 +9,8 @@ import MessageFooter, { MessageFooterRef } from '../ui/chat/message-footer';
 import useMessages from '@/hooks/useMessages';
 import { NewMessage } from '@/types/chat-socket';
 import MessageMenu from '../ui/chat/message-menu';
+import ViewReactions from '../ui/chat/view-reactions';
+import { EmojiPicker } from '../shared/emoji-picker';
 
 const MessageScreenComponent = () => {
   const footerRef = useRef<MessageFooterRef>(null);
@@ -41,6 +43,8 @@ const MessageScreenComponent = () => {
   const [messageToReply, setMessageToReply] = useState<NewMessage | null>(null);
   const [messageToEdit, setMessageToEdit] = useState<NewMessage | null>(null);
   const [messageToDelete, setMessageToDelete] = useState<NewMessage | null>(null);
+  const [messageToView, setMessageToView] = useState<NewMessage | null>(null);
+  const [showEmojiModal, toggleEmojiModal] = useState(false);
 
   useEffect(() => {
     scrollToTop();
@@ -78,6 +82,7 @@ const MessageScreenComponent = () => {
                 <>
                   {item.senderId !== Number(receiverId) ? (
                     <SenderMessage
+                      setMessageToView={setMessageToView}
                       message={item}
                       handleSwipe={() => setMessageToReply(item)}
                       name={name as string}
@@ -96,6 +101,7 @@ const MessageScreenComponent = () => {
                     />
                   ) : (
                     <ReceiverMessage
+                      setMessageToView={setMessageToView}
                       message={item}
                       handleSwipe={() => setMessageToReply(item)}
                       name={name as string}
@@ -129,7 +135,47 @@ const MessageScreenComponent = () => {
             setMessageToEdit={setMessageToEdit}
             setMessageToDelete={setMessageToDelete}
             room=""
+            showEmojiModal={showEmojiModal}
+            toggleEmojiModal={toggleEmojiModal}
           />
+
+          <EmojiPicker
+            isVisible={showEmojiModal}
+            onClose={() => toggleEmojiModal(false)}
+            onEmojiSelect={(emoji) => {
+              if (!menuState.message && !messageToView) return;
+
+              const messageId = menuState.message?.id ?? messageToView!.id;
+              addReaction({ messageId, reaction: emoji });
+              setMenuState({ visible: false, message: null, position: null });
+              toggleEmojiModal(false);
+            }}
+          />
+          {messageToView && (
+            <ViewReactions
+              isVisible={messageToView !== null}
+              message={messageToView}
+              messages={messages}
+              onClose={() => setMessageToView(null)}
+              addReaction={addReaction}
+              removeReaction={removeReaction}
+              name={name as string}
+              toggleEmojiModal={() => {
+                setMenuState({
+                  visible: false,
+                  message: messageToView,
+                  position: {
+                    x: 0,
+                    y: 0,
+                    width: Dimensions.get('screen').width,
+                    height: Dimensions.get('screen').height,
+                  },
+                });
+                toggleEmojiModal(true);
+                setMessageToView(null);
+              }}
+            />
+          )}
 
           <MessageFooter
             messageToReply={messageToReply}

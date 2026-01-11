@@ -1,3 +1,4 @@
+import { Reaction } from '@/types/chat-socket';
 import { GetSinglePhotoResponse } from '@/types/slices/search';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
@@ -90,6 +91,29 @@ function formatChatTime(dateStr: string, useChatStyle = false): string {
   }
 }
 
+const groupReactions = (reactions: Reaction[]) => {
+  const grouped = reactions.reduce(
+    (acc, reaction) => {
+      const emoji = reaction.reaction;
+      if (!acc[emoji]) {
+        acc[emoji] = {
+          emoji,
+          count: 0,
+          userIds: [],
+          reactionIds: [],
+        };
+      }
+      acc[emoji].count++;
+      acc[emoji].userIds.push(reaction.userId);
+      acc[emoji].reactionIds.push(reaction.id);
+      return acc;
+    },
+    {} as Record<string, { emoji: string; count: number; userIds: number[]; reactionIds: number[] }>
+  );
+
+  return Object.values(grouped);
+};
+
 export const helpers = {
   generateSimilarQuery,
   generateId,
@@ -99,4 +123,5 @@ export const helpers = {
   minFutureDate,
   isFetchBaseQueryError,
   formatChatTime,
+  groupReactions,
 };

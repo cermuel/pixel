@@ -9,6 +9,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
   const room = Number(roomString);
   const { socket } = useSocket();
   const [messages, setMessages] = useState<NewMessage[]>([]);
+  const [typing, setTyping] = useState<{ name: string; userId: number; room: number } | null>(null);
 
   useEffect(() => {
     if (!socket || !user) return;
@@ -44,6 +45,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
           const updated = [...prev];
           updated[optimisticIndex] = {
             ...message,
+            reactions: message.reactions || [],
             status: 'SENT',
           };
           return updated;
@@ -54,6 +56,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
         if (message.senderId !== user.userId) {
           socket.emit(EVENTS.EMIT.MARK_AS_READ, { messageIds: [message.id], roomId: room });
         }
+
         return [...prev, message];
       });
     };
@@ -76,6 +79,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
         )
       );
     };
+
     const handleReactionRemoved = (reaction: Reaction) => {
       setMessages((prev) =>
         prev.map((m) =>
@@ -89,11 +93,20 @@ const useMessages = ({ room: roomString }: { room: string }) => {
       );
     };
 
+    const handleTyping = (typingData: { name: string; userId: number; room: number }) => {
+      setTyping(typingData);
+    };
+    const handleTypingStopped = (typingData: { name: string; userId: number; room: number }) => {
+      setTyping(null);
+    };
+
     socket.on(EVENTS.ON.MESSAGES, handleMessages);
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
     socket.on(EVENTS.ON.MESSAGES_READ, handleMessagesRead);
     socket.on(EVENTS.ON.MESSAGE_REACTED, handleReactionAdded);
     socket.on(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
+    socket.on(EVENTS.ON.USER_TYPING, handleTyping);
+    socket.on(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
 
     return () => {
       socket.off(EVENTS.ON.MESSAGES, handleMessages);
@@ -101,6 +114,8 @@ const useMessages = ({ room: roomString }: { room: string }) => {
       socket.off(EVENTS.ON.MESSAGES_READ, handleMessagesRead);
       socket.off(EVENTS.ON.MESSAGE_REACTED, handleReactionAdded);
       socket.off(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
+      socket.off(EVENTS.ON.USER_TYPING, handleTyping);
+      socket.off(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
     };
   }, [socket, user]);
 
@@ -110,7 +125,7 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     const tempId = `temp-${Date.now()}-${Math.random()}`;
 
     const optimisticMessage = {
-      id: tempId as any as number, // Type assertion
+      id: tempId as any as number,
       message,
       senderId: user.userId,
       chatId: room,
@@ -142,8 +157,16 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     if (!socket) return;
     socket.emit(EVENTS.EMIT.UNREACT_TO_MESSAGE, { id, roomId: room }, () => {});
   };
+  const startTyping = () => {
+    if (!socket) return;
+    socket.emit(EVENTS.EMIT.TYPING, { roomId: room }, () => {});
+  };
+  const stopTyping = () => {
+    if (!socket) return;
+    socket.emit(EVENTS.EMIT.STOP_TYPING, { roomId: room }, () => {});
+  };
 
-  return { messages, sendMessage, addReaction, removeReaction };
+  return { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping };
 };
 
 export default useMessages;
