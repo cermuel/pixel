@@ -1,8 +1,9 @@
 import { apiSlice } from '../api/apiSlice';
 import { ChatResponse, ProfileResponse, UserResponse } from '@/types/slices/user';
 
-const BASE_URI = 'http://192.168.100.152:4444';
-// 'https://pixel-server-pule.onrender.com';
+const BASE_URI =
+  // 'http://192.168.1.22:4444';
+  'https://pixel-server-pule.onrender.com';
 
 const authSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -11,6 +12,7 @@ const authSlice = apiSlice.injectEndpoints({
         url: `${BASE_URI}/account/`,
         method: 'GET',
       }),
+      providesTags: ['User'],
     }),
     users: builder.query<UserResponse, { query: string }>({
       query: (params) => ({
@@ -27,6 +29,22 @@ const authSlice = apiSlice.injectEndpoints({
         params,
       }),
       providesTags: ['User'],
+    }),
+    groups: builder.query<unknown, { query: string }>({
+      query: (params) => ({
+        url: `${BASE_URI}/groupchat`,
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['User'],
+    }),
+    createGroup: builder.mutation<unknown, { query: string }>({
+      query: (params) => ({
+        url: `${BASE_URI}/groupchat`,
+        method: 'POST',
+        params,
+      }),
+      invalidatesTags: ['User'],
     }),
   }),
 });

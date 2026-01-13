@@ -57,16 +57,30 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
       });
     };
 
+    const handleMessageDeleted = (message: NewMessage) => {
+      setChats((prev) =>
+        prev.map((c) => {
+          if (c.id !== message.chatId) return c;
+          return {
+            ...c,
+            messages:
+              c.messages.length > 0
+                ? [{ ...c.messages[0], message: 'This message was deleted' }]
+                : [],
+          };
+          // return message;
+        })
+      );
+    };
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
-
     socket.on(EVENTS.ON.USER_TYPING, handleTyping);
     socket.on(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
-
+    socket.on(EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
     return () => {
       socket.off(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
-
       socket.off(EVENTS.ON.USER_TYPING, handleTyping);
       socket.off(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
+      socket.off(EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
     };
   }, [socket, setChats]);
 

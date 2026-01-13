@@ -1,4 +1,13 @@
-import { View, FlatList, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import {
+  View,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  Alert,
+  Text,
+  Pressable,
+} from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,12 +21,15 @@ import MessageMenu from '../ui/chat/message-menu';
 import ViewReactions from '../ui/chat/view-reactions';
 import { EmojiPicker } from '../shared/emoji-picker';
 import TypingIndicator from '../ui/chat/typing-indicator';
+import { BottomSheet } from '../ui/bottom-sheet';
+import useAuth from '@/context/useAuth';
 
 const MessageScreenComponent = () => {
+  const { user } = useAuth();
   const footerRef = useRef<MessageFooterRef>(null);
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<any>(null);
-  const { id, receiverId, name } = useLocalSearchParams();
+  const { id, name } = useLocalSearchParams();
 
   const scrollToTop = (isAnimated = false) => {
     if (flatListRef.current) {
@@ -25,10 +37,19 @@ const MessageScreenComponent = () => {
     }
   };
 
-  const { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping, typing } =
-    useMessages({
-      room: id as string,
-    });
+  const {
+    messages,
+    sendMessage,
+    addReaction,
+    removeReaction,
+    startTyping,
+    stopTyping,
+    typing,
+    editMessage,
+    deleteMessage,
+  } = useMessages({
+    room: id as string,
+  });
   const reversedMessages = [...messages].reverse();
 
   const [focus, setFocus] = useState(false);
@@ -57,11 +78,25 @@ const MessageScreenComponent = () => {
     if (messageToEdit) setText(messageToEdit.message);
   }, [messageToReply, messageToEdit]);
 
+  if (!user)
+    return (
+      <View className="flex-1 items-center justify-center gap-4 bg-[#141718]">
+        <Text className="text-2xl font-bold text-white">You are not logged in!</Text>
+        <View className="flex-row items-center gap-4">
+          <Pressable className="w-max rounded-md bg-white px-6 py-2.5">
+            <Text className="text-lg font-bold text-black ">Login</Text>
+          </Pressable>
+          <Pressable className="w-max rounded-md bg-[#888] px-6 py-2.5">
+            <Text className="text-lg font-bold text-black">Home</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+
   return (
     <SafeAreaView
       style={{
         paddingTop: insets.top,
-
         paddingRight: insets.right,
         paddingLeft: insets.left,
       }}
@@ -82,7 +117,7 @@ const MessageScreenComponent = () => {
             renderItem={({ item, index }) => {
               return (
                 <>
-                  {item.senderId !== Number(receiverId) ? (
+                  {item.senderId == user.userId ? (
                     <SenderMessage
                       setMessageToView={setMessageToView}
                       message={item}
@@ -180,6 +215,35 @@ const MessageScreenComponent = () => {
           )}
           {typing && <TypingIndicator />}
 
+          <BottomSheet
+            isVisible={messageToDelete !== null}
+            onClose={() => setMessageToDelete(null)}
+            snapPoints={[0.25]}>
+            <Text className="mb-1 text-center text-xl font-bold text-white">Delete Message</Text>
+            <Text className="text-center text-sm font-bold text-[#CCC]">
+              Are you sure you want to delete this message?
+            </Text>
+            <Text className="text-center text-sm font-bold text-[#CCC]">
+              This action cannot be undone.
+            </Text>
+            <View className="mt-7 flex-1 flex-row items-center gap-4">
+              <Pressable
+                onPress={() => setMessageToDelete(null)}
+                className="flex-1 items-center justify-center rounded-md bg-white py-2.5">
+                <Text className="text-lg font-semibold">Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  if (!messageToDelete) return;
+                  deleteMessage({ messageId: messageToDelete.id });
+                  setMessageToDelete(null);
+                }}
+                className="flex-1 items-center justify-center rounded-md bg-[#EC0000] py-2.5">
+                <Text className="text-lg font-bold text-white">Delete</Text>
+              </Pressable>
+            </View>
+          </BottomSheet>
+
           <MessageFooter
             messageToReply={messageToReply}
             setMessageToReply={setMessageToReply}
@@ -193,6 +257,7 @@ const MessageScreenComponent = () => {
             setFocus={setFocus}
             startTyping={startTyping}
             stopTyping={stopTyping}
+            editMessage={editMessage}
           />
           <View style={{ height: focus ? 0 : insets.bottom }} />
         </View>

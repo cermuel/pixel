@@ -1,5 +1,5 @@
-import { View, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { View, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard } from 'react-native';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SignupScreen from '@/components/ui/auth/signup';
@@ -7,6 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Signup= () => {
   const insets = useSafeAreaInsets();
+   useEffect(() => {
+      return () => {
+        Keyboard.dismiss();
+      };
+    }, []);
   return (
     <KeyboardAvoidingView
       className="flex-1"

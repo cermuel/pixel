@@ -96,8 +96,25 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     const handleTyping = (typingData: { name: string; userId: number; room: number }) => {
       setTyping(typingData);
     };
-    const handleTypingStopped = (typingData: { name: string; userId: number; room: number }) => {
+    const handleTypingStopped = () => {
       setTyping(null);
+    };
+
+    const handleMessageEdited = (message: NewMessage) => {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== message.id) return m;
+          return message;
+        })
+      );
+    };
+    const handleMessageDeleted = (message: NewMessage) => {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== message.id) return m;
+          return message;
+        })
+      );
     };
 
     socket.on(EVENTS.ON.MESSAGES, handleMessages);
@@ -107,6 +124,8 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     socket.on(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
     socket.on(EVENTS.ON.USER_TYPING, handleTyping);
     socket.on(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
+    socket.on(EVENTS.ON.MESSAGE_EDITED, handleMessageEdited);
+    socket.on(EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
 
     return () => {
       socket.off(EVENTS.ON.MESSAGES, handleMessages);
@@ -116,10 +135,12 @@ const useMessages = ({ room: roomString }: { room: string }) => {
       socket.off(EVENTS.ON.MESSAGE_UNREACTED, handleReactionRemoved);
       socket.off(EVENTS.ON.USER_TYPING, handleTyping);
       socket.off(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
+      socket.off(EVENTS.ON.MESSAGE_EDITED, handleMessageEdited);
+      socket.off(EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
     };
   }, [socket, user]);
 
-  const sendMessage = ({ message, replyToId }: { message: string; replyToId?: number }) => {
+  const sendMessage = ({ message, replyTo }: { message: string; replyTo?: NewMessage }) => {
     if (!socket || !user) return;
 
     const tempId = `temp-${Date.now()}-${Math.random()}`;
@@ -129,10 +150,10 @@ const useMessages = ({ room: roomString }: { room: string }) => {
       message,
       senderId: user.userId,
       chatId: room,
-      replyTo: null,
-      replyToId: replyToId || null,
+      replyTo: replyTo,
+      replyToId: replyTo?.id || null,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: null,
       deletedAt: null,
       reactions: [],
       status: 'PENDING' as const,
@@ -142,11 +163,46 @@ const useMessages = ({ room: roomString }: { room: string }) => {
 
     const messageToSend = {
       roomId: room,
-      message,
-      replyToId,
+      message: message.trim(),
+      replyToId: replyTo?.id,
     };
 
     socket.emit(EVENTS.EMIT.SEND_MESSAGE, messageToSend, () => {});
+  };
+
+  const editMessage = ({ message, messageId }: { message: string; messageId: number }) => {
+    if (!socket) return;
+    const messageToSend = {
+      roomId: room,
+      message: message.trim,
+      messageId,
+    };
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        return { ...m, status: 'PENDING' };
+      })
+    );
+
+    socket.emit(EVENTS.EMIT.EDIT_MESSAGE, messageToSend, () => {});
+  };
+
+  const deleteMessage = ({ messageId }: { messageId: number }) => {
+    if (!socket) return;
+    const messageToDelete = {
+      roomId: room,
+      messageId,
+    };
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        return { ...m, isDeleted: true };
+      })
+    );
+
+    socket.emit(EVENTS.EMIT.DELETE_MESSAGE, messageToDelete, () => {});
   };
 
   const addReaction = ({ messageId, reaction }: { messageId: number; reaction: string }) => {
@@ -166,7 +222,17 @@ const useMessages = ({ room: roomString }: { room: string }) => {
     socket.emit(EVENTS.EMIT.STOP_TYPING, { roomId: room }, () => {});
   };
 
-  return { messages, sendMessage, addReaction, removeReaction, startTyping, stopTyping, typing };
+  return {
+    messages,
+    sendMessage,
+    addReaction,
+    removeReaction,
+    startTyping,
+    stopTyping,
+    typing,
+    editMessage,
+    deleteMessage,
+  };
 };
 
 export default useMessages;

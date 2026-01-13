@@ -28,22 +28,26 @@ const signupSchema = z.object({
 
 const SignupScreen = () => {
   const [register, { isLoading }] = useRegisterMutation();
-  const [signupDetails, setSignupDetails] = useState({ phone: '', email: '', name: '', password: '' });
+  const [signupDetails, setSignupDetails] = useState({
+    phone: '',
+    email: '',
+    name: '',
+    password: '',
+  });
   const [showPassword, togglePassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSignup = async () => {
     try {
-      // Validate form data
       const validatedData = signupSchema.parse({
         phone: signupDetails.phone,
         email: signupDetails.email || undefined,
         name: signupDetails.name,
         password: signupDetails.password,
       });
-      
+
       setErrors({});
-      
+
       const response = await register({
         phone: validatedData.phone,
         email: validatedData.email,
@@ -87,9 +91,7 @@ const SignupScreen = () => {
             onChangeText={(text) => setSignupDetails({ ...signupDetails, phone: text })}
             value={signupDetails.phone}
           />
-          {errors.phone && (
-            <Text className="mt-1 text-sm text-red-500">{errors.phone}</Text>
-          )}
+          {errors.phone && <Text className="mt-1 text-sm text-red-500">{errors.phone}</Text>}
         </View>
         <View>
           <TextInput
@@ -99,9 +101,7 @@ const SignupScreen = () => {
             onChangeText={(text) => setSignupDetails({ ...signupDetails, name: text })}
             value={signupDetails.name}
           />
-          {errors.name && (
-            <Text className="mt-1 text-sm text-red-500">{errors.name}</Text>
-          )}
+          {errors.name && <Text className="mt-1 text-sm text-red-500">{errors.name}</Text>}
         </View>
         <View>
           <TextInput
@@ -113,9 +113,7 @@ const SignupScreen = () => {
             onChangeText={(text) => setSignupDetails({ ...signupDetails, email: text })}
             value={signupDetails.email}
           />
-          {errors.email && (
-            <Text className="mt-1 text-sm text-red-500">{errors.email}</Text>
-          )}
+          {errors.email && <Text className="mt-1 text-sm text-red-500">{errors.email}</Text>}
         </View>
         <View>
           <View className="relative w-full flex-row gap-2.5 rounded-xl border border-[#38383A] p-4">
@@ -135,9 +133,7 @@ const SignupScreen = () => {
               )}
             </Pressable>
           </View>
-          {errors.password && (
-            <Text className="mt-1 text-sm text-red-500">{errors.password}</Text>
-          )}
+          {errors.password && <Text className="mt-1 text-sm text-red-500">{errors.password}</Text>}
         </View>
         <Pressable
           disabled={isLoading}

@@ -3,15 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { SvgUri } from 'react-native-svg';
 import { useBookmark } from '@/hooks/useBookmark';
 import { Image } from 'expo-image';
 import { constants } from '@/utils/constants';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import useAuth from '@/context/useAuth';
 
 const ProfileScreen = () => {
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { bookmarks, collections } = useBookmark();
@@ -19,7 +20,6 @@ const ProfileScreen = () => {
   const headerOpacity = useRef(new Animated.Value(0)).current;
 
   const [headerScrolled, setHeaderScrolled] = useState(false);
-  const [name, setName] = useState('Guest');
 
   useEffect(() => {
     Animated.timing(headerOpacity, {
@@ -70,16 +70,14 @@ const ProfileScreen = () => {
             style={{ flex: 1 }}
             contentContainerStyle={{ gap: 10, alignItems: 'center' }}>
             <SvgUri
-              uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${name}`}
+              uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${user ? user.name : 'Guest'}`}
               width={100}
               height={100}
               style={{ borderRadius: 50, overflow: 'hidden' }}
             />
-            <TextInput
-              value={name}
-              onChangeText={(text) => setName(text)}
-              className="w-full flex-1 text-center text-4xl font-bold text-white"
-            />
+            <Text className="w-full flex-1 text-center text-4xl font-bold text-white">
+              {user ? user.name : 'Guest'}
+            </Text>
 
             {bookmarks.length > 0 ? (
               <View className="my-10 flex-row flex-wrap items-center justify-center">

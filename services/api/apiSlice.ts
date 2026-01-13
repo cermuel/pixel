@@ -5,7 +5,7 @@ import { RootState } from '../store';
 
 const BASE_URI: string = 'https://api.unsplash.com';
 
-const API_KEY: string = Constants.expoConfig?.extra?.SPLASH_ACCESS_KEY;
+const API_KEY: string = process.env.EXPO_PUBLIC_SPLASH_ACCESS_KEY as string;
 // const API_KEY: string = Constants.expoConfig?.extra?.SPLASH_BACKUP_KEY;
 
 const customBaseQuery = fetchBaseQuery({

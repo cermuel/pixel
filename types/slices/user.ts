@@ -87,3 +87,9 @@ export interface UserData {
   sentChats: { id: number; senderId: number; receiverId: number; createdAt: string }[];
   receivedChats: { id: number; senderId: number; receiverId: number; createdAt: string }[];
 }
+
+export interface CreateGroupchatPayload {
+  name: string;
+  description?: string;
+  members: { userId: number; isAdmin: boolean }[];
+}

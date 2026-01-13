@@ -25,11 +25,11 @@ const ChatItem = ({
           pathname: '/message',
           params: {
             id: item.id,
-            receiverId: receiver.id,
             name: receiver.name,
           },
         });
       }}
+      style={{ height: 50 }}
       className="flex-row items-center gap-4">
       <View style={{ width: 45, height: 45, borderRadius: 22.5, overflow: 'hidden' }}>
         <SvgUri
@@ -38,13 +38,15 @@ const ChatItem = ({
           height={45}
         />
       </View>
-      <View className="">
+      <View className="h-full justify-center">
         <Text className="text-base font-bold text-white">{receiver.name}</Text>
         {item.isTyping ? (
           <Text className="text-sm text-white">{item.typingUser} is typing...</Text>
         ) : (
           <Text className="text-sm text-white">
-            {item?.messages[0]?.message || 'Click to start a chat'}
+            {(item?.messages[0]?.isDeleted
+              ? 'This message was deleted'
+              : item?.messages[0]?.message.trim()) || 'Click to start a chat'}
           </Text>
         )}
       </View>
