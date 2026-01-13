@@ -13,34 +13,39 @@ import { useLoginMutation } from '@/services/auth/authSlice';
 import { Toast } from 'toastify-react-native';
 import { Error } from '@/types/slices/auth';
 import useAuth from '@/context/useAuth';
-import { router } from 'expo-router';
 import ToastManager from 'toastify-react-native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
+  const navigation = useNavigation();
   const { setToken, setIsAuth, setUser } = useAuth();
   const [login, { isLoading }] = useLoginMutation();
-  const [loginDetails, setLoginDetails] = useState({ emailOrPhone: '', password: '' });
+  const [loginDetails, setLoginDetails] = useState({ email: '', password: '' });
   const [showPassword, togglePassword] = useState(false);
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
   const handleLogin = async () => {
-    if (!loginDetails.emailOrPhone || !loginDetails.password) return;
+    Keyboard.dismiss();
+    if (!loginDetails.email || !loginDetails.password) return;
     try {
       const response = await login({
         password: loginDetails.password,
-        email: emailRegex.test(loginDetails.emailOrPhone) ? loginDetails.emailOrPhone : undefined,
-        phone: !emailRegex.test(loginDetails.emailOrPhone) ? loginDetails.emailOrPhone : undefined,
+        email: emailRegex.test(loginDetails.email) ? loginDetails.email : undefined,
+        phone: !emailRegex.test(loginDetails.email) ? loginDetails.email : undefined,
       }).unwrap();
 
       setToken(response.token);
       setUser(response.data);
       setIsAuth(true);
       Toast.success('Login successful');
-      router.dismiss();
-      setTimeout(() => {
-        router.replace('/home');
-      }, 50);
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'home' }],
+        })
+      );
     } catch (initError) {
       console.log({ initError });
       let error = initError as Error;
@@ -56,7 +61,7 @@ const LoginScreen = () => {
           className="w-full gap-2.5 rounded-xl border border-[#38383A] p-4 text-white"
           placeholder="Email or Username"
           placeholderTextColor={'white'}
-          onChangeText={(text) => setLoginDetails({ ...loginDetails, emailOrPhone: text })}
+          onChangeText={(text) => setLoginDetails({ ...loginDetails, email: text })}
         />
         <View className="relative w-full flex-row gap-2.5 rounded-xl border border-[#38383A] p-4">
           <TextInput

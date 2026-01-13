@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import ReplySection from './reply-section';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { helpers } from '@/utils/helpers';
 
 const ReceiverMessage = ({
@@ -34,6 +34,7 @@ const ReceiverMessage = ({
   const iconTranslateX = useSharedValue(-20);
 
   const showMenuHandler = () => {
+    if (message?.isDeleted) return;
     messageRef.current?.measureInWindow((x, y, width, height) => {
       onLongPress?.(message.id, x, y, width, height);
     });
@@ -85,8 +86,16 @@ const ReceiverMessage = ({
               {message.replyTo && (
                 <ReplySection messageToReply={message.replyTo} name={name} mode="RECEIVER" />
               )}
-              <Text className="px-2 pb-0 pt-1 text-white">{message.message}</Text>
-              {message.reactions?.length > 0 && !isPreview && (
+              {message.isDeleted ? (
+                <View className="flex-row items-center gap-1">
+                  <MaterialIcons name="block" size={20} color="#CCC" />
+                  <Text className=" text-white">This message was deleted</Text>
+                </View>
+              ) : (
+                <Text className="px-2 pb-0 pt-1 text-white">{message.message}</Text>
+              )}
+              w
+              {message.reactions?.length > 0 && !message.isDeleted && !isPreview && (
                 <Pressable
                   onPress={() => {
                     if (setMessageToView) setMessageToView(message);
@@ -106,6 +115,7 @@ const ReceiverMessage = ({
 
             {!isPreview && (
               <Text className="mr-auto text-[10px] font-medium text-white">
+                {message.updatedAt && <Text>Edited •</Text>}
                 {helpers.formatChatTime(message.createdAt)}
               </Text>
             )}

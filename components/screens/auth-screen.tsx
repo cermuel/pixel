@@ -1,23 +1,20 @@
-import { View, Text, Image, Pressable, Platform } from 'react-native';
-import React, { ReactNode, useCallback, useState } from 'react';
+import { View, Text, Image, Pressable, Platform, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import Feather from '@expo/vector-icons/Feather';
-import { useFocusEffect, useRouter } from 'expo-router';
-import ToastManager from 'toastify-react-native';
+import { useRouter } from 'expo-router';
 
 const AuthScreen = () => {
   const router = useRouter();
 
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      setIsVisible(true);
-      return () => {
-        setIsVisible(false);
-      };
-    }, [])
-  );
+  useEffect(() => {
+    if (!isVisible) setIsVisible(true);
+    return () => {
+      setIsVisible(false);
+    };
+  }, []);
 
   const SelectMethod = () => (
     <View className="gap-4">
@@ -32,13 +29,13 @@ const AuthScreen = () => {
         <Text className="text-xl font-medium text-white">Continue with Google</Text>
       </Pressable>
       <Pressable
-        onPress={() => router.push('/signup')}
+        onPress={() => router.replace('/signup')}
         className="flex-row items-center justify-center gap-2.5 rounded-2xl bg-[#7878803A] py-3">
         <Feather name="repeat" color={'white'} />
         <Text className="text-xl font-medium text-white">Sign up with Email</Text>
       </Pressable>
       <Pressable
-        onPress={() => router.push('/login')}
+        onPress={() => router.replace('/login')}
         className="flex-row items-center justify-center gap-2.5 rounded-2xl border border-[#38383A] bg-transparent py-3">
         <Text className="text-xl font-medium text-white">Log in</Text>
       </Pressable>
@@ -56,11 +53,12 @@ const AuthScreen = () => {
         snapPoints={[0.33]}
         isVisible={isVisible}
         style={{ backgroundColor: '#000', padding: 10 }}
-        onClose={() => router.back()}
+        onClose={() => {
+          setIsVisible(false);
+          router.push('/home');
+        }}
         isTransparent>
         <SelectMethod />
-
-        <ToastManager useModal={true} theme="dark" />
       </BottomSheet>
     </View>
   );

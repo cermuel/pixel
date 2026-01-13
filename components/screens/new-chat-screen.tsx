@@ -1,4 +1,12 @@
-import { View, Text, TouchableOpacity, TextInput, FlatList, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import React, { useState } from 'react';
 import { SvgUri } from 'react-native-svg';
 import { router } from 'expo-router';
@@ -9,6 +17,7 @@ import { UserData } from '@/types/slices/user';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useSocket from '@/context/chat-socket';
 import useChat from '@/hooks/useChat';
+import { fa } from 'zod/v4/locales';
 
 const NewChatScreenComponent = () => {
   const [query, setQuery] = useState('');
@@ -24,9 +33,12 @@ const NewChatScreenComponent = () => {
   } = useUsersQuery({ query: useDebounce(query, 500) });
 
   const fetchingUsers = isFetching || loadingChats;
+  const [submitting, setSubmitting] = useState(false);
 
   const handleMessage = () => {
     if (!selectedUser || !socket) return;
+
+    setSubmitting(true);
 
     const combinedChats = [...selectedUser.receivedChats, ...selectedUser.sentChats];
     if (combinedChats.length == 0) {
@@ -54,12 +66,18 @@ const NewChatScreenComponent = () => {
           </TouchableOpacity>
           <Text className="text-lg font-bold text-white">New chat</Text>
 
-          <Text
-            className="text-lg font-bold text-yellow-600 disabled:text-[#555]"
-            onPress={handleMessage}
-            disabled={!selectedUser}>
-            Message
-          </Text>
+          {submitting ? (
+            <View className="w-20 items-center justify-center">
+              <ActivityIndicator size={16} color={'#ca8a04'} />
+            </View>
+          ) : (
+            <Text
+              className="text-lg font-bold text-yellow-600 disabled:text-[#555]"
+              onPress={handleMessage}
+              disabled={!selectedUser || submitting}>
+              Message
+            </Text>
+          )}
         </>
       </View>
       <View className="flex-1 border-white p-6 pt-0">

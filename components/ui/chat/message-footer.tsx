@@ -11,7 +11,8 @@ export interface MessageFooterRef {
 }
 
 interface MessageFooterProps {
-  sendMessage: ({ message, replyToId }: { message: string; replyToId?: number }) => void;
+  sendMessage: ({}: { message: string; replyTo?: NewMessage }) => void;
+  editMessage: ({}: { message: string; messageId: number }) => void;
   setText: Dispatch<React.SetStateAction<string>>;
   text: string;
   messageToReply: NewMessage | null;
@@ -28,6 +29,7 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
   (
     {
       sendMessage,
+      editMessage,
       setText,
       text,
       messageToReply,
@@ -131,9 +133,15 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
             className="mb-2"
             onPress={() => {
               if (text.trim()) {
-                sendMessage({ message: text, replyToId: messageToReply?.id });
-                setText('');
-                setMessageToReply(null);
+                if (messageToEdit) {
+                  editMessage({ message: text, messageId: messageToEdit.id });
+                  setText('');
+                  setMessageToEdit(null);
+                } else {
+                  sendMessage({ message: text, replyTo: messageToReply || undefined });
+                  setText('');
+                  setMessageToReply(null);
+                }
               }
             }}>
             <FontAwesome name="send" size={16} color="white" />

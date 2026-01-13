@@ -87,15 +87,7 @@ const SearchView = ({
             numColumns={2}
             style={{ paddingTop: isTransparent ? 0 : insets.top + 80 }}
             masonry
-            ListFooterComponent={
-              <>
-                {typeof children === 'string' || typeof children === 'number' ? (
-                  <Text>{children}</Text>
-                ) : (
-                  children
-                )}
-              </>
-            }
+            ListFooterComponent={<>{children}</>}
           />
         </SafeAreaView>
       )}

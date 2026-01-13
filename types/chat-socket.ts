@@ -10,6 +10,7 @@ export interface NewMessage {
   deletedAt: string | null;
   reactions: Reaction[];
   status?: 'PENDING' | 'SENT' | 'READ' | undefined;
+  isDeleted?: boolean;
 }
 
 export interface Reaction {
