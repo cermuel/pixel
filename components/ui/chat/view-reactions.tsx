@@ -100,7 +100,7 @@ const ViewReactions = ({
             <Wrapper key={reaction.id}>
               <View style={{ width: 40, height: 40, borderRadius: 20, overflow: 'hidden' }}>
                 <SvgUri
-                  uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${username}`}
+                  uri={`https://api.dicebear.com/9.x/big-ears/svg?seed=${username}`}
                   width={40}
                   height={40}
                 />

@@ -26,6 +26,7 @@ const screens: SCREEN_TYPE[] = ['Chats', 'Groups'];
 const ChatScreenComponent = () => {
   const [screen, setScreen] = useState<SCREEN_TYPE>('Chats');
   const [query, setQuery] = useState('');
+  const [gcQuery, setGcQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [chats, setChats] = useState<ChatData[]>([]);
 

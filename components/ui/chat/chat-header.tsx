@@ -2,12 +2,12 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import React, { Dispatch } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { SvgUri } from 'react-native-svg';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 import { logout as logoutFunc } from '@/services/authStateSlice';
 import useAuth from '@/context/useAuth';
 import { SCREEN_TYPE } from '@/components/screens/chat-screen';
+import Avatar from './avatar';
 
 const ChatHeader = ({
   screen,
@@ -39,12 +39,7 @@ const ChatHeader = ({
           className={
             'h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#11111177]'
           }>
-          <SvgUri
-            uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${user?.name || 'Guest'}`}
-            width={35}
-            height={35}
-            style={{ borderRadius: 30, overflow: 'hidden' }}
-          />
+          <Avatar name={user?.name ?? ''} size={35} />
         </TouchableOpacity>
         <Text className="text-2xl font-bold text-white">Chat</Text>
         <TouchableOpacity

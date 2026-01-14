@@ -17,7 +17,7 @@ const MessageHeader = ({ name }: { name: string }) => {
           <Ionicons name="chevron-back" size={20} color={'white'} />
         </TouchableOpacity>
         <SvgUri
-          uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${name || 'Guest'}`}
+          uri={`https://api.dicebear.com/9.x/big-ears/svg?seed=${name || 'Guest'}`}
           width={35}
           height={35}
           style={{ borderRadius: 30, overflow: 'hidden' }}

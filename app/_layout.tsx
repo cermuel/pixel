@@ -20,6 +20,7 @@ export default function Layout() {
           <Stack.Screen name="chat" />
           <Stack.Screen name="message" />
           <Stack.Screen name="new-chat" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="create-group" options={{ presentation: 'modal' }} />
           <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
         </Stack>
         <StatusBar barStyle={'light-content'} backgroundColor="#ffffff" />

@@ -70,7 +70,7 @@ const ProfileScreen = () => {
             style={{ flex: 1 }}
             contentContainerStyle={{ gap: 10, alignItems: 'center' }}>
             <SvgUri
-              uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${user ? user.name : 'Guest'}`}
+              uri={`https://api.dicebear.com/9.x/big-ears/svg?seed=${user ? user.name : 'Guest'}`}
               width={100}
               height={100}
               style={{ borderRadius: 50, overflow: 'hidden' }}

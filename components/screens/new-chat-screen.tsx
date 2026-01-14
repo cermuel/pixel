@@ -18,6 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import useSocket from '@/context/chat-socket';
 import useChat from '@/hooks/useChat';
 import { fa } from 'zod/v4/locales';
+import GroupChatAvatar from '../ui/chat/groupchat-avatar';
 
 const NewChatScreenComponent = () => {
   const [query, setQuery] = useState('');
@@ -64,7 +65,7 @@ const NewChatScreenComponent = () => {
           <TouchableOpacity onPress={() => router.back()}>
             <Text className="text-lg font-medium text-white">Cancel</Text>
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-white">New chat</Text>
+          <Text className="text-lg font-bold text-white">New Chat</Text>
 
           {submitting ? (
             <View className="w-20 items-center justify-center">
@@ -75,7 +76,7 @@ const NewChatScreenComponent = () => {
               className="text-lg font-bold text-yellow-600 disabled:text-[#555]"
               onPress={handleMessage}
               disabled={!selectedUser || submitting}>
-              Message
+              Next
             </Text>
           )}
         </>
@@ -94,7 +95,20 @@ const NewChatScreenComponent = () => {
           </View>
         </View>
 
-        <View className="mt-6 flex-1">
+        <View className="my-6 rounded-xl bg-[#252525] p-4">
+          <Pressable
+            onPress={() => {
+              router.replace('/create-group');
+            }}
+            className="flex-row items-center gap-4 px-4 pl-0">
+            <View>
+              <GroupChatAvatar />
+            </View>
+
+            <Text className="text-base font-medium leading-4 text-[#ca8a04]">New Group</Text>
+          </Pressable>
+        </View>
+        <View className=" flex-1">
           {fetchingUsers ? (
             <ChatSkeleton />
           ) : usersData ? (
@@ -104,7 +118,7 @@ const NewChatScreenComponent = () => {
               keyExtractor={(item) => item.id.toString()}
               contentContainerClassName="bg-[#252525] rounded-xl overflow-hidden"
               ListEmptyComponent={
-                <View>
+                <View className="py-4">
                   <Text className="text-center font-medium text-[#DDD]">No users found</Text>
                 </View>
               }
@@ -112,7 +126,7 @@ const NewChatScreenComponent = () => {
                 <View className="flex-row items-center gap-4 px-4 py-2">
                   <View style={{ width: 40, height: 40, borderRadius: 25, overflow: 'hidden' }}>
                     <SvgUri
-                      uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${item.name || 'Guest'}`}
+                      uri={`https://api.dicebear.com/9.x/big-ears/svg?seed=${item.name || 'Guest'}`}
                       width={40}
                       height={40}
                       style={{ borderRadius: 30, overflow: 'hidden' }}

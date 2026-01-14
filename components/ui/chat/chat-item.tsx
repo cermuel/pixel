@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { SvgUri } from 'react-native-svg';
 import { helpers } from '@/utils/helpers';
 import { ChatData } from '@/types/slices/user';
+import Avatar from './avatar';
 
 const ChatItem = ({
   item,
@@ -31,13 +32,7 @@ const ChatItem = ({
       }}
       style={{ height: 50 }}
       className="flex-row items-center gap-4">
-      <View style={{ width: 45, height: 45, borderRadius: 22.5, overflow: 'hidden' }}>
-        <SvgUri
-          uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${receiver.name || 'Guest'}`}
-          width={45}
-          height={45}
-        />
-      </View>
+      <Avatar name={receiver.name} size={45} />
       <View className="h-full justify-center">
         <Text className="text-base font-bold text-white">{receiver.name}</Text>
         {item.isTyping ? (

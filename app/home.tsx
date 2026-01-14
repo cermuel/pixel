@@ -39,7 +39,7 @@ const Home = () => {
                 'h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#11111177]'
               }>
               <SvgUri
-                uri={'https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Samuel'}
+                uri={'https://api.dicebear.com/9.x/big-ears/svg?seed=Samuel'}
                 width={35}
                 height={35}
                 style={{ borderRadius: 30, overflow: 'hidden' }}

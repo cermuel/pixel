@@ -38,11 +38,14 @@ const authSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ['User'],
     }),
-    createGroup: builder.mutation<unknown, { query: string }>({
-      query: (params) => ({
+    createGroup: builder.mutation<
+      unknown,
+      { name: string; description?: string; members: { userId: number; isAdmin?: boolean }[] }
+    >({
+      query: (body) => ({
         url: `${BASE_URI}/groupchat`,
         method: 'POST',
-        params,
+        body,
       }),
       invalidatesTags: ['User'],
     }),
