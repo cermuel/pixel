@@ -79,7 +79,7 @@ const GroupchatMessageScreenComponent = () => {
   const [messageToDelete, setMessageToDelete] = useState<GroupchatMessage | null>(null);
   const [messageToView, setMessageToView] = useState<GroupchatMessage | null>(null);
   const [showEmojiModal, toggleEmojiModal] = useState(false);
-  const [isSearch, toggleSearch] = useState(true);
+  const [isSearch, toggleSearch] = useState(false);
   const [query, setQuery] = useState('');
 
   useEffect(() => {
