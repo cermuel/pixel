@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import React, { Dispatch } from 'react';
-import { NewMessage } from '@/types/chat-socket';
+import { GroupchatMessage, NewMessage } from '@/types/chat-socket';
 import { helpers } from '@/utils/helpers';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAuth from '@/context/useAuth';
@@ -11,8 +11,8 @@ const ReplySection = ({
   name,
   mode = 'SEND',
 }: {
-  messageToReply: Partial<NewMessage>;
-  setMessageToReply?: Dispatch<NewMessage | null>;
+  messageToReply: Partial<NewMessage | GroupchatMessage>;
+  setMessageToReply?: Dispatch<NewMessage | GroupchatMessage | null>;
   name: string;
   mode?: 'SENDER' | 'RECEIVER' | 'SEND';
 }) => {

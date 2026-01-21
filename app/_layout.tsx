@@ -11,6 +11,7 @@ export default function Layout() {
       <AppProvider>
         <NotificationWrapper />
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
           <Stack.Screen name="index" />
           <Stack.Screen name="home" />
           <Stack.Screen name="photo" />
@@ -19,8 +20,11 @@ export default function Layout() {
           <Stack.Screen name="auth" />
           <Stack.Screen name="chat" />
           <Stack.Screen name="message" />
+          <Stack.Screen name="groupchat-message" />
+          <Stack.Screen name="groupchat-details" />
           <Stack.Screen name="new-chat" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="login" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="create-group" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="add-to-group" options={{ presentation: 'modal' }} />
         </Stack>
         <StatusBar barStyle={'light-content'} backgroundColor="#ffffff" />
       </AppProvider>

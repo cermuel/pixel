@@ -13,6 +13,14 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
   useEffect(() => {
     if (!socket || !setChats) return;
 
+    const handleNewChat = (chat: ChatData) => {
+      setChats((prev) => {
+        return prev.map((c) => {
+          if (c.id != chat.id) return c;
+          return chat;
+        });
+      });
+    };
     const handleNewMessage = (message: NewMessage) => {
       setChats((prev) => {
         return prev.map((c) => {
@@ -72,11 +80,13 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
         })
       );
     };
+    socket.on(EVENTS.ON.NEW_CHAT_CREATED, handleNewChat);
     socket.on(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
     socket.on(EVENTS.ON.USER_TYPING, handleTyping);
     socket.on(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
     socket.on(EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
     return () => {
+      socket.off(EVENTS.ON.NEW_CHAT_CREATED, handleNewChat);
       socket.off(EVENTS.ON.NEW_MESSAGE, handleNewMessage);
       socket.off(EVENTS.ON.USER_TYPING, handleTyping);
       socket.off(EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
@@ -84,8 +94,9 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
     };
   }, [socket, setChats]);
 
-  const createRoom = (selectedUser: { id: number; name: string }) => {
+  const createRoom = (selectedUser: { id: number; name: string }, callback?: () => void) => {
     if (!socket) return;
+
     socket.emit(
       EVENTS.EMIT.CREATE_ROOM,
       {
@@ -93,6 +104,7 @@ const useChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<ChatData[]>>
         name: selectedUser.name,
       },
       (room: any) => {
+        if (callback) callback();
         router.dismiss();
         setTimeout(() => {
           router.push({

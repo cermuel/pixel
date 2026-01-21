@@ -10,6 +10,7 @@ import { Image } from 'expo-image';
 import { constants } from '@/utils/constants';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useAuth from '@/context/useAuth';
+import Avatar from '@/components/ui/chat/avatar';
 
 const ProfileScreen = () => {
   const { user } = useAuth();
@@ -69,12 +70,8 @@ const ProfileScreen = () => {
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
             contentContainerStyle={{ gap: 10, alignItems: 'center' }}>
-            <SvgUri
-              uri={`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${user ? user.name : 'Guest'}`}
-              width={100}
-              height={100}
-              style={{ borderRadius: 50, overflow: 'hidden' }}
-            />
+            <Avatar size={100} name={user ? user.name : 'Guest'} />
+
             <Text className="w-full flex-1 text-center text-4xl font-bold text-white">
               {user ? user.name : 'Guest'}
             </Text>

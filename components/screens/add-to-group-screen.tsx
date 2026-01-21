@@ -8,52 +8,68 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
-import { router } from 'expo-router';
-import { useUsersQuery } from '@/services/user/userSlice';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useSingleGroupQuery, useUsersQuery } from '@/services/user/userSlice';
 import { useDebounce } from '@/hooks/useDebounce';
-import ChatSkeleton from '../ui/chat/chat-skeleton';
-import { UserData } from '@/types/slices/user';
+import { Groupchat, UserData } from '@/types/slices/user';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useSocket from '@/context/chat-socket';
 import useChat from '@/hooks/useChat';
-import GroupChatAvatar from '../ui/chat/groupchat-avatar';
+import ChatSkeleton from '../ui/chat/chat-skeleton';
 import Avatar from '../ui/chat/avatar';
+import useGroupChat from '@/hooks/useGroupchat';
 
-const NewChatScreenComponent = () => {
+const AddToGroupComponent = () => {
+  const { groupchat: groupchatString } = useLocalSearchParams();
+  const { socket } = useSocket();
+  const { addMember } = useGroupChat({});
+
+  const [submitting, setSubmitting] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedUser, setUser] = useState<UserData | null>(null);
+  const [groupchat, setGroupchat] = useState<Groupchat>(JSON.parse(groupchatString as string));
 
-  const { socket } = useSocket();
-  const { createRoom } = useChat({});
   const {
     data: usersData,
     isLoading: loadingChats,
     isFetching,
     error,
   } = useUsersQuery({ query: useDebounce(query, 500) });
+  const {
+    data: currentGroup,
+    isLoading: loadingGroup,
+    isFetching: fetchingGroup,
+  } = useSingleGroupQuery({ id: groupchat.id });
 
-  const fetchingUsers = isFetching || loadingChats;
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleMessage = () => {
+  const handleAdd = () => {
     if (!selectedUser || !socket) return;
 
     setSubmitting(true);
 
-    const combinedChats = [...selectedUser.receivedChats, ...selectedUser.sentChats];
-    if (combinedChats.length == 0) {
-      createRoom(selectedUser);
-    } else {
-      const chat = combinedChats[0];
-      router.dismiss();
-      setTimeout(() => {
-        router.push({
-          pathname: '/message',
-          params: { id: chat.id, name: selectedUser.name },
-        });
-      }, 50);
-    }
+    addMember({ roomId: groupchat.id, userId: selectedUser.id }, (data) => {
+      if (data?.status == 'ADDED') {
+        setGroupchat({ ...groupchat, groupMembers: [...groupchat.groupMembers, data.member] });
+        router.dismiss();
+        setTimeout(() => {
+          router.push({
+            pathname: '/groupchat-message',
+            params: {
+              id: groupchat.id,
+              name: groupchat.name,
+              members: JSON.stringify(groupchat.groupMembers),
+              groupchat: JSON.stringify(groupchat),
+            },
+          });
+        }, 50);
+      }
+    });
   };
+
+  const users = usersData?.data.filter((user) => {
+    return !currentGroup?.data?.groupMembers?.some((member) => member.user.id === user.id);
+  });
+
+  const fetchingUsers = isFetching || loadingChats || loadingGroup || fetchingGroup;
 
   return (
     <View className="flex-1 bg-[#141718]">
@@ -73,9 +89,9 @@ const NewChatScreenComponent = () => {
           ) : (
             <Text
               className="text-lg font-bold text-yellow-600 disabled:text-[#555]"
-              onPress={handleMessage}
+              onPress={handleAdd}
               disabled={!selectedUser || submitting}>
-              Next
+              Add
             </Text>
           )}
         </>
@@ -94,26 +110,13 @@ const NewChatScreenComponent = () => {
           </View>
         </View>
 
-        <View className="my-6 rounded-xl bg-[#252525] p-4">
-          <Pressable
-            onPress={() => {
-              router.replace('/create-group');
-            }}
-            className="flex-row items-center gap-4 px-4 pl-0">
-            <View>
-              <GroupChatAvatar />
-            </View>
-
-            <Text className="text-base font-medium leading-4 text-[#ca8a04]">New Group</Text>
-          </Pressable>
-        </View>
-        <View className=" flex-1">
+        <View className="mt-5 flex-1">
           {fetchingUsers ? (
             <ChatSkeleton />
-          ) : usersData ? (
+          ) : users ? (
             <FlatList
               className="flex-1"
-              data={usersData?.data}
+              data={users}
               keyExtractor={(item) => item.id.toString()}
               contentContainerClassName="bg-[#252525] rounded-xl overflow-hidden"
               ListEmptyComponent={
@@ -157,4 +160,4 @@ const NewChatScreenComponent = () => {
   );
 };
 
-export default NewChatScreenComponent;
+export default AddToGroupComponent;

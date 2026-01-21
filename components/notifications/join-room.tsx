@@ -47,7 +47,7 @@ const JoinRoom = ({ name, room }: { name: string; room: string }) => {
             <View className="aspect-square h-[80%] items-center justify-center overflow-hidden rounded-full bg-[#CB9DF0]">
               <SvgUri
                 className={``}
-                uri={'https://api.dicebear.com/9.x/micah/svg?seed=Daniel'}
+                uri={'https://api.dicebear.com/9.x/big-ears/svg?seed=Daniel'}
                 width={35}
                 height={35}
               />
@@ -73,7 +73,7 @@ const JoinRoom = ({ name, room }: { name: string; room: string }) => {
             <View className="aspect-square h-[80%] items-center justify-center overflow-hidden rounded-full bg-[#CB9DF0]">
               <SvgUri
                 className={``}
-                uri={'https://api.dicebear.com/9.x/micah/svg?seed=Daniel'}
+                uri={'https://api.dicebear.com/9.x/big-ears/svg?seed=Daniel'}
                 width={35}
                 height={35}
               />
@@ -109,7 +109,7 @@ const JoinRoom = ({ name, room }: { name: string; room: string }) => {
               <View className="flex-row items-center justify-center gap-2">
                 <CalendarClock size={18} color={`#DDD`} />
                 <Text className="text-xl text-white/70">
-                  {helpers.formatDate(helpers.today, { dateOnly: true })} -{' '}
+                  {helpers.formatDate(helpers.today, { dateOnly: true })} -
                   {helpers.formatDate(helpers.tomorrow, { dateOnly: true })}
                 </Text>
               </View>
