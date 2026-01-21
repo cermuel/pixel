@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import React, { Dispatch, ReactNode, useEffect, useState } from 'react';
-import { NewMessage } from '@/types/chat-socket';
+import { GroupchatMessage } from '@/types/chat-socket';
 import { BottomSheet } from '../bottom-sheet';
 import { SvgUri } from 'react-native-svg';
 import useAuth from '@/context/useAuth';
@@ -8,18 +8,18 @@ import { helpers } from '@/utils/helpers';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Avatar from './avatar';
 
-interface ViewReactionProps {
+interface GroupchatViewReactionProps {
   isVisible: boolean;
   onClose: () => void;
-  message: NewMessage;
-  messages: NewMessage[];
+  message: GroupchatMessage;
+  messages: GroupchatMessage[];
   addReaction: ({}: { messageId: number; reaction: string }) => void;
   removeReaction: ({}: { id: number }) => void;
   name: string;
   toggleEmojiModal: () => void;
 }
 
-const ViewReactions = ({
+const GroupchatViewReactions = ({
   isVisible,
   onClose,
   message: defaultMessage,
@@ -28,7 +28,7 @@ const ViewReactions = ({
   removeReaction,
   name,
   toggleEmojiModal,
-}: ViewReactionProps) => {
+}: GroupchatViewReactionProps) => {
   const { user } = useAuth();
   const [message, setMessage] = useState(defaultMessage);
 
@@ -78,7 +78,7 @@ const ViewReactions = ({
       </ScrollView>
       <ScrollView contentContainerClassName="gap-4" showsVerticalScrollIndicator={false}>
         {message.reactions?.map((reaction) => {
-          const username = reaction.userId == user?.userId ? user.name : name;
+          const username = reaction.userId == user?.userId ? user?.name || '' : name;
 
           const Wrapper = ({ children }: { children: ReactNode }) => (
             <>
@@ -117,4 +117,4 @@ const ViewReactions = ({
   );
 };
 
-export default ViewReactions;
+export default GroupchatViewReactions;

@@ -8,8 +8,9 @@ import ForYouView from '@/components/home/for-you-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchView from '@/components/home/search-view';
-import { SvgUri } from 'react-native-svg';
 import { useRouter } from 'expo-router';
+import Avatar from '@/components/ui/chat/avatar';
+import useAuth from '@/context/useAuth';
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 type Tab = 'Explore' | 'For You';
@@ -17,6 +18,7 @@ const tabs: Tab[] = ['Explore', 'For You'];
 const Home = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
 
   const [selectedTab, toggleTab] = useState<Tab>('Explore');
   const [isSearching, setIsSearching] = useState(false);
@@ -38,12 +40,7 @@ const Home = () => {
               className={
                 'h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#11111177]'
               }>
-              <SvgUri
-                uri={'https://api.dicebear.com/9.x/big-ears/svg?seed=Samuel'}
-                width={35}
-                height={35}
-                style={{ borderRadius: 30, overflow: 'hidden' }}
-              />
+              <Avatar name={user?.name || 'Guest'} size={35} />
             </AnimatedTouchableOpacity>
             <View className="flex-row items-center gap-1">
               {tabs.map((tab) => (

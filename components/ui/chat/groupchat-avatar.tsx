@@ -6,15 +6,17 @@ const GroupChatAvatar = ({
   names = ['Sarah', 'Marcus', 'Samuel'],
   containerWidth = 40,
   width = 30,
+  position = 5,
 }: {
   names?: string[];
   containerWidth?: number;
   width?: number;
+  position?: number;
 }) => {
   const positions = [
-    { top: -5, left: -5 },
-    { top: -5, right: -5 },
-    { bottom: -5, left: 5 },
+    { top: -position, left: -position },
+    { top: -position, right: -position },
+    { bottom: -position, left: position },
   ];
 
   const avatars = names.slice(0, 3).map((name, index) => ({

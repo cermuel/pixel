@@ -1,31 +1,33 @@
 import { View, Text, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import React, { Dispatch, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { NewMessage } from '@/types/chat-socket';
+import { GroupchatMessage } from '@/types/chat-socket';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ReplySection from './reply-section';
+import { GroupMember } from '@/types/slices/user';
 
-export interface MessageFooterRef {
+export interface GroupchatMessageFooterRef {
   focusInput: () => void;
   isFocused: () => boolean;
 }
 
-interface MessageFooterProps {
-  sendMessage: ({}: { message: string; replyTo?: NewMessage }) => void;
+interface GroupchatMessageFooterProps {
+  sendMessage: ({}: { message: string; replyTo?: GroupchatMessage }) => void;
   editMessage: ({}: { message: string; messageId: number }) => void;
   setText: Dispatch<React.SetStateAction<string>>;
   text: string;
-  messageToReply: NewMessage | null;
-  setMessageToReply: Dispatch<NewMessage | null>;
-  messageToEdit: NewMessage | null;
-  setMessageToEdit: Dispatch<NewMessage | null>;
+  messageToReply: GroupchatMessage | null;
+  setMessageToReply: Dispatch<GroupchatMessage | null>;
+  messageToEdit: GroupchatMessage | null;
+  setMessageToEdit: Dispatch<GroupchatMessage | null>;
   name: string;
   setFocus: Dispatch<boolean>;
   startTyping: () => void;
   stopTyping: () => void;
+  members: GroupMember[];
 }
 
-const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
+const GroupchatMessageFooter = forwardRef<GroupchatMessageFooterRef, GroupchatMessageFooterProps>(
   (
     {
       sendMessage,
@@ -40,6 +42,7 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
       setFocus,
       startTyping,
       stopTyping,
+      members,
     },
     ref
   ) => {
@@ -100,7 +103,8 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
         {messageToReply && (
           <ReplySection
             messageToReply={messageToReply}
-            name={name}
+            name={members.find((m) => m.userId == messageToReply.senderId)?.user.name || ''}
+            //@ts-ignore
             setMessageToReply={setMessageToReply}
           />
         )}
@@ -152,6 +156,6 @@ const MessageFooter = forwardRef<MessageFooterRef, MessageFooterProps>(
   }
 );
 
-MessageFooter.displayName = 'MessageFooter';
+GroupchatMessageFooter.displayName = 'GroupchatMessageFooter';
 
-export default MessageFooter;
+export default GroupchatMessageFooter;

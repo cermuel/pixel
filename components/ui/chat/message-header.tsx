@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { SvgUri } from 'react-native-svg';
+import Avatar from './avatar';
 
 const MessageHeader = ({ name }: { name: string }) => {
   return (
@@ -16,12 +16,7 @@ const MessageHeader = ({ name }: { name: string }) => {
           }}>
           <Ionicons name="chevron-back" size={20} color={'white'} />
         </TouchableOpacity>
-        <SvgUri
-          uri={`https://api.dicebear.com/9.x/big-ears/svg?seed=${name || 'Guest'}`}
-          width={35}
-          height={35}
-          style={{ borderRadius: 30, overflow: 'hidden' }}
-        />
+        <Avatar name={name || 'Guest'} size={35} />
         <Text className="text-2xl font-bold text-white">{name}</Text>
       </>
     </View>

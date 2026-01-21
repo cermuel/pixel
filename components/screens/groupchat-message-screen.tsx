@@ -4,33 +4,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  Alert,
   Text,
   Pressable,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import SenderMessage from '../ui/chat/sender-message';
-import ReceiverMessage from '../ui/chat/receiver-message';
-import MessageHeader from '../ui/chat/message-header';
-import MessageFooter, { MessageFooterRef } from '../ui/chat/message-footer';
-import useMessages from '@/hooks/useMessages';
-import { NewMessage } from '@/types/chat-socket';
-import MessageMenu from '../ui/chat/message-menu';
-import ViewReactions from '../ui/chat/view-reactions';
+import { MessageFooterRef } from '../ui/chat/message-footer';
+import { GroupchatMessage } from '@/types/chat-socket';
 import { EmojiPicker } from '../shared/emoji-picker';
 import TypingIndicator from '../ui/chat/typing-indicator';
 import { BottomSheet } from '../ui/bottom-sheet';
 import useAuth from '@/context/useAuth';
-import useChat from '@/hooks/useChat';
+import { Groupchat, GroupMember } from '@/types/slices/user';
+import GroupchatHeader from '../ui/chat/groupchat-header';
+import useGroupchatMessages from '@/hooks/useGroupchatMessages';
+import GroupchatReceiverMessage from '../ui/chat/groupchat-receiver-message';
+import GroupchatSenderMessage from '../ui/chat/groupchat-sender-message';
+import GroupchatMessageFooter from '../ui/chat/groupchat-message-footer';
+import GroupchatViewReactions from '../ui/chat/groupchat-view-reaction';
+import GroupchatMessageMenu from '../ui/chat/groupchat-message-menu';
+import { EvilIcons } from '@expo/vector-icons';
 
-const MessageScreenComponent = () => {
+const GroupchatMessageScreenComponent = () => {
   const { user } = useAuth();
   const footerRef = useRef<MessageFooterRef>(null);
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<any>(null);
-  const { id, name } = useLocalSearchParams();
+  const { id, name, members: membersString, groupchat: groupchatString } = useLocalSearchParams();
+
+  const members: GroupMember[] = JSON.parse(membersString as string);
+  const groupchat: Groupchat = JSON.parse(groupchatString as string);
 
   const scrollToTop = (isAnimated = false) => {
     if (flatListRef.current) {
@@ -38,18 +45,20 @@ const MessageScreenComponent = () => {
     }
   };
 
-  const { joinRoom } = useChat({});
   const {
     messages,
+    hasMore,
+    typing,
+    loadingMore,
     sendMessage,
     addReaction,
     removeReaction,
     startTyping,
     stopTyping,
-    typing,
     editMessage,
     deleteMessage,
-  } = useMessages({
+    loadMoreMessages,
+  } = useGroupchatMessages({
     room: id as string,
   });
   const reversedMessages = [...messages].reverse();
@@ -58,22 +67,20 @@ const MessageScreenComponent = () => {
   const [text, setText] = useState<string>('');
   const [menuState, setMenuState] = useState<{
     visible: boolean;
-    message: NewMessage | null;
+    message: GroupchatMessage | null;
     position: { x: number; y: number; width: number; height: number } | null;
   }>({
     visible: false,
     message: null,
     position: null,
   });
-  const [messageToReply, setMessageToReply] = useState<NewMessage | null>(null);
-  const [messageToEdit, setMessageToEdit] = useState<NewMessage | null>(null);
-  const [messageToDelete, setMessageToDelete] = useState<NewMessage | null>(null);
-  const [messageToView, setMessageToView] = useState<NewMessage | null>(null);
+  const [messageToReply, setMessageToReply] = useState<GroupchatMessage | null>(null);
+  const [messageToEdit, setMessageToEdit] = useState<GroupchatMessage | null>(null);
+  const [messageToDelete, setMessageToDelete] = useState<GroupchatMessage | null>(null);
+  const [messageToView, setMessageToView] = useState<GroupchatMessage | null>(null);
   const [showEmojiModal, toggleEmojiModal] = useState(false);
-
-  useEffect(() => {
-    if (id) joinRoom({ room: Number(id) });
-  }, [id]);
+  const [isSearch, toggleSearch] = useState(true);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     scrollToTop();
@@ -113,22 +120,64 @@ const MessageScreenComponent = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top / 2}>
         <View className="relative flex-1">
-          <MessageHeader name={name as string} />
+          {isSearch ? (
+            <View className="h-20 flex-row items-center gap-4 px-4">
+              <View className="flex-1 flex-row items-center gap-2">
+                <EvilIcons name="search" size={24} color="white" />
+                <View className="relative flex-1">
+                  <TextInput
+                    className="flex-1 text-white"
+                    onChangeText={(text) => setQuery(text)}
+                    value={query}
+                    style={{ padding: 0 }}
+                  />
+                  {!query && (
+                    <Text
+                      className="absolute left-0 top-1/2 -translate-y-1/2 text-lg font-medium text-[#CCC]"
+                      style={{ pointerEvents: 'none' }}>
+                      Search
+                    </Text>
+                  )}
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  toggleSearch(false);
+                }}>
+                <Text className="text-lg font-medium text-white">Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <GroupchatHeader groupchat={groupchat} name={name as string} members={members} />
+          )}
           <FlatList
             inverted
             className="flex-1"
             data={reversedMessages}
             contentContainerClassName="gap-4 p-4"
+            ListFooterComponent={() =>
+              hasMore && (
+                <TouchableOpacity
+                  onPress={loadMoreMessages}
+                  className="mx-auto my-4 w-28 items-center rounded-full bg-[#ca8a04] py-1">
+                  {loadingMore ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <Text className="my-0.5 font-bold text-white">Load More</Text>
+                  )}
+                </TouchableOpacity>
+              )
+            }
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item, index }) => {
+            renderItem={({ item }) => {
               return (
                 <>
                   {item.senderId == user.userId ? (
-                    <SenderMessage
+                    <GroupchatSenderMessage
                       setMessageToView={setMessageToView}
                       message={item}
                       handleSwipe={() => setMessageToReply(item)}
-                      name={name as string}
+                      members={members}
                       onLongPress={() => {
                         setMenuState({
                           visible: true,
@@ -143,11 +192,11 @@ const MessageScreenComponent = () => {
                       }}
                     />
                   ) : (
-                    <ReceiverMessage
+                    <GroupchatReceiverMessage
                       setMessageToView={setMessageToView}
                       message={item}
                       handleSwipe={() => setMessageToReply(item)}
-                      name={name as string}
+                      members={members}
                       onLongPress={() => {
                         setMenuState({
                           visible: true,
@@ -166,7 +215,7 @@ const MessageScreenComponent = () => {
               );
             }}
           />
-          <MessageMenu
+          <GroupchatMessageMenu
             visible={menuState.visible}
             message={menuState.message}
             position={menuState.position}
@@ -177,9 +226,8 @@ const MessageScreenComponent = () => {
             setMessageToReply={setMessageToReply}
             setMessageToEdit={setMessageToEdit}
             setMessageToDelete={setMessageToDelete}
-            room=""
-            showEmojiModal={showEmojiModal}
             toggleEmojiModal={toggleEmojiModal}
+            members={members}
           />
 
           <EmojiPicker
@@ -195,7 +243,7 @@ const MessageScreenComponent = () => {
             }}
           />
           {messageToView && (
-            <ViewReactions
+            <GroupchatViewReactions
               isVisible={messageToView !== null}
               message={messageToView}
               messages={messages}
@@ -250,7 +298,7 @@ const MessageScreenComponent = () => {
             </View>
           </BottomSheet>
 
-          <MessageFooter
+          <GroupchatMessageFooter
             messageToReply={messageToReply}
             setMessageToReply={setMessageToReply}
             messageToEdit={messageToEdit}
@@ -264,6 +312,7 @@ const MessageScreenComponent = () => {
             startTyping={startTyping}
             stopTyping={stopTyping}
             editMessage={editMessage}
+            members={members}
           />
           <View style={{ height: focus ? 0 : insets.bottom }} />
         </View>
@@ -272,4 +321,4 @@ const MessageScreenComponent = () => {
   );
 };
 
-export default MessageScreenComponent;
+export default GroupchatMessageScreenComponent;

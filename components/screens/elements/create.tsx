@@ -6,7 +6,17 @@ import { UserData } from '@/types/slices/user';
 import GroupChatAvatar from '@/components/ui/chat/groupchat-avatar';
 import Avatar from '@/components/ui/chat/avatar';
 
-const Create = ({ setUser, users }: { setUser: Dispatch<UserData[]>; users: UserData[] }) => {
+const Create = ({
+  setUser,
+  users,
+  name,
+  setName,
+}: {
+  setUser: Dispatch<UserData[]>;
+  users: UserData[];
+  name: string;
+  setName: Dispatch<string>;
+}) => {
   const flatListRef = useRef<FlatList | null>(null);
 
   return (
@@ -19,7 +29,9 @@ const Create = ({ setUser, users }: { setUser: Dispatch<UserData[]>; users: User
         />
         <TextInput
           placeholder="Enter group name"
-          className="flex-1 border-b  border-b-[#999] pb-1 text-white"
+          className="flex-1 border-b border-b-[#999]  pb-1 font-medium text-[#EEE]"
+          value={name}
+          onChangeText={(text) => setName(text)}
         />
       </View>
 

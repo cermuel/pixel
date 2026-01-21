@@ -1,9 +1,16 @@
 import { apiSlice } from '../api/apiSlice';
-import { ChatResponse, ProfileResponse, UserResponse } from '@/types/slices/user';
+import {
+  ChatResponse,
+  CreateGroupchatPayload,
+  CreateGroupResponse,
+  GetGroupResponse,
+  GetSingleGroupResponse,
+  ProfileResponse,
+  UserResponse,
+} from '@/types/slices/user';
 
-const BASE_URI =
-  // 'http://192.168.1.22:4444';
-  'https://pixel-server-pule.onrender.com';
+const BASE_URI = 'http://192.168.100.158:4444';
+// 'https://pixel-server-pule.onrender.com';
 
 const authSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,7 +37,7 @@ const authSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ['User'],
     }),
-    groups: builder.query<unknown, { query: string }>({
+    groups: builder.query<GetGroupResponse, { query: string }>({
       query: (params) => ({
         url: `${BASE_URI}/groupchat`,
         method: 'GET',
@@ -38,10 +45,14 @@ const authSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ['User'],
     }),
-    createGroup: builder.mutation<
-      unknown,
-      { name: string; description?: string; members: { userId: number; isAdmin?: boolean }[] }
-    >({
+    singleGroup: builder.query<GetSingleGroupResponse, { id: string | number }>({
+      query: ({ id }) => ({
+        url: `${BASE_URI}/groupchat/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['User'],
+    }),
+    createGroup: builder.mutation<CreateGroupResponse, CreateGroupchatPayload>({
       query: (body) => ({
         url: `${BASE_URI}/groupchat`,
         method: 'POST',
@@ -52,4 +63,11 @@ const authSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useProfileQuery, useUsersQuery, useChatsQuery } = authSlice;
+export const {
+  useProfileQuery,
+  useUsersQuery,
+  useChatsQuery,
+  useCreateGroupMutation,
+  useGroupsQuery,
+  useSingleGroupQuery,
+} = authSlice;
