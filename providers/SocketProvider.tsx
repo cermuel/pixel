@@ -24,9 +24,9 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
       // 'https://pixel-server-pule.onrender.com';
 
       Platform.select({
-        ios: 'http://192.168.100.158:4444',
-        android: 'http://192.168.100.158:4444',
-        default: 'http://192.168.100.158:4444',
+        ios: 'http://192.168.1.22:4444',
+        android: 'http://192.168.1.22:4444',
+        default: 'http://192.168.1.22:4444',
       });
 
     const socketInstance = io(SOCKET_URL, {

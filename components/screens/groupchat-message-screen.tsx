@@ -28,13 +28,20 @@ import GroupchatMessageFooter from '../ui/chat/groupchat-message-footer';
 import GroupchatViewReactions from '../ui/chat/groupchat-view-reaction';
 import GroupchatMessageMenu from '../ui/chat/groupchat-message-menu';
 import { EvilIcons } from '@expo/vector-icons';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const GroupchatMessageScreenComponent = () => {
   const { user } = useAuth();
   const footerRef = useRef<MessageFooterRef>(null);
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<any>(null);
-  const { id, name, members: membersString, groupchat: groupchatString } = useLocalSearchParams();
+  const {
+    id,
+    name,
+    members: membersString,
+    groupchat: groupchatString,
+    isSearch: searchString,
+  } = useLocalSearchParams();
 
   const members: GroupMember[] = JSON.parse(membersString as string);
   const groupchat: Groupchat = JSON.parse(groupchatString as string);
@@ -50,6 +57,8 @@ const GroupchatMessageScreenComponent = () => {
     hasMore,
     typing,
     loadingMore,
+    defaultMessages,
+    setMessages,
     sendMessage,
     addReaction,
     removeReaction,
@@ -58,6 +67,7 @@ const GroupchatMessageScreenComponent = () => {
     editMessage,
     deleteMessage,
     loadMoreMessages,
+    searchMessages,
   } = useGroupchatMessages({
     room: id as string,
   });
@@ -79,12 +89,21 @@ const GroupchatMessageScreenComponent = () => {
   const [messageToDelete, setMessageToDelete] = useState<GroupchatMessage | null>(null);
   const [messageToView, setMessageToView] = useState<GroupchatMessage | null>(null);
   const [showEmojiModal, toggleEmojiModal] = useState(false);
-  const [isSearch, toggleSearch] = useState(false);
+  const [isSearch, toggleSearch] = useState(
+    searchString ? JSON.parse(searchString as string) : false || false
+  );
   const [query, setQuery] = useState('');
+
+  const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
     scrollToTop();
   }, [messages]);
+
+  useEffect(() => {
+    if (debouncedQuery) searchMessages(debouncedQuery);
+    else setMessages(defaultMessages);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     if ((messageToReply || messageToEdit) && footerRef) footerRef.current?.focusInput();
@@ -143,6 +162,7 @@ const GroupchatMessageScreenComponent = () => {
               <TouchableOpacity
                 onPress={() => {
                   toggleSearch(false);
+                  setQuery('');
                 }}>
                 <Text className="text-lg font-medium text-white">Cancel</Text>
               </TouchableOpacity>
@@ -298,23 +318,29 @@ const GroupchatMessageScreenComponent = () => {
             </View>
           </BottomSheet>
 
-          <GroupchatMessageFooter
-            messageToReply={messageToReply}
-            setMessageToReply={setMessageToReply}
-            messageToEdit={messageToEdit}
-            setMessageToEdit={setMessageToEdit}
-            ref={footerRef}
-            sendMessage={sendMessage}
-            setText={setText}
-            text={text}
-            name={name as string}
-            setFocus={setFocus}
-            startTyping={startTyping}
-            stopTyping={stopTyping}
-            editMessage={editMessage}
-            members={members}
-          />
-          <View style={{ height: focus ? 0 : insets.bottom }} />
+          {!isSearch ? (
+            <>
+              <GroupchatMessageFooter
+                messageToReply={messageToReply}
+                setMessageToReply={setMessageToReply}
+                messageToEdit={messageToEdit}
+                setMessageToEdit={setMessageToEdit}
+                ref={footerRef}
+                sendMessage={sendMessage}
+                setText={setText}
+                text={text}
+                name={name as string}
+                setFocus={setFocus}
+                startTyping={startTyping}
+                stopTyping={stopTyping}
+                editMessage={editMessage}
+                members={members}
+              />
+              <View style={{ height: focus ? 0 : insets.bottom }} />
+            </>
+          ) : (
+            <View className="flex-row items-center p-4"></View>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

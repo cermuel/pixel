@@ -6,7 +6,7 @@ import {
 } from '@/types/slices/auth';
 import { apiSlice } from '../api/apiSlice';
 
-const BASE_URI = 'http://192.168.100.158:4444';
+const BASE_URI = 'http://192.168.1.22:4444';
 // 'https://pixel-server-pule.onrender.com';
 
 const authSlice = apiSlice.injectEndpoints({

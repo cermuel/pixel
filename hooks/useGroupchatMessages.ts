@@ -9,6 +9,7 @@ const useGroupchatMessages = ({ room: roomString }: { room: string }) => {
   const room = Number(roomString);
   const { socket } = useSocket();
   const [messages, setMessages] = useState<GroupchatMessage[]>([]);
+  const [defaultMessages, setDefaultMessages] = useState<GroupchatMessage[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [typing, setTyping] = useState<{ name: string; userId: number; room: number } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -23,6 +24,7 @@ const useGroupchatMessages = ({ room: roomString }: { room: string }) => {
 
     const handleMessages = ({ messages: initMessages, hasMore: initHasMore }: any) => {
       setMessages(initMessages);
+      setDefaultMessages(initMessages);
       setHasMore(initHasMore);
 
       const unreadMessageIds = initMessages
@@ -234,10 +236,30 @@ const useGroupchatMessages = ({ room: roomString }: { room: string }) => {
     const oldestMessage = messages[0];
 
     socket.emit(
-      'GC_LOAD_MORE_MESSAGES',
+      GC_EVENTS.EMIT.GC_LOAD_MORE_MESSAGES,
       { roomId: room, cursor: oldestMessage.id },
       (result: { messages: any[]; hasMore: boolean }) => {
         setMessages((prev) => [...result.messages, ...prev]);
+        setDefaultMessages((prev) => [...result.messages, ...prev]);
+        setHasMore(result.hasMore);
+        setLoadingMore(false);
+      }
+    );
+  };
+
+  const searchMessages = (query: string) => {
+    if (loadingMore || !socket || !query) return;
+    console.log('here');
+
+    setLoadingMore(true);
+
+    const oldestMessage = messages[0];
+
+    socket.emit(
+      GC_EVENTS.EMIT.GC_SEARCH_MESSAGES,
+      { roomId: room, cursor: oldestMessage?.id, query },
+      (result: { messages: any[]; hasMore: boolean }) => {
+        setMessages((prev) => [...result.messages]);
         setHasMore(result.hasMore);
         setLoadingMore(false);
       }
@@ -249,6 +271,8 @@ const useGroupchatMessages = ({ room: roomString }: { room: string }) => {
     typing,
     hasMore,
     loadingMore,
+    defaultMessages,
+    setMessages,
     sendMessage,
     addReaction,
     removeReaction,
@@ -257,6 +281,7 @@ const useGroupchatMessages = ({ room: roomString }: { room: string }) => {
     editMessage,
     deleteMessage,
     loadMoreMessages,
+    searchMessages,
   };
 };
 

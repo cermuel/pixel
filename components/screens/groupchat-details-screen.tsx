@@ -49,6 +49,17 @@ const GroupchatDetailsScreen = () => {
         pathname: '/add-to-group',
         params: { groupchat: JSON.stringify(groupchat) },
       });
+    } else if (button.action == 'search') {
+      router.push({
+        pathname: '/groupchat-message',
+        params: {
+          id: groupchat.id,
+          name: groupchat.name,
+          members: JSON.stringify(groupchat.groupMembers),
+          groupchat: JSON.stringify(groupchat),
+          isSearch: 'true',
+        },
+      });
     }
   };
 
@@ -69,7 +80,7 @@ const GroupchatDetailsScreen = () => {
             inputRange: [0, 1],
             outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.3)'],
           }),
-          paddingTop: insets.top,
+          paddingTop: insets.top + 20,
         }}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -114,7 +125,7 @@ const GroupchatDetailsScreen = () => {
         </View>
         <View className="mt-4 rounded-xl bg-[#212121] p-4">
           {groupchat.groupMembers.map((member) => (
-            <GroupchatDetailsMember member={member} setMember={setMember} />
+            <GroupchatDetailsMember member={member} setMember={setMember} key={member.id} />
           ))}
         </View>
         {selectedMember && member && (

@@ -30,6 +30,7 @@ const CreateGroupScreenComponent = () => {
             id: res.data.id,
             name: res.data.name,
             members: JSON.stringify(res.data.groupMembers),
+            groupchat: JSON.stringify(res.data),
           },
         });
       }, 50);
