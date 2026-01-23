@@ -5,6 +5,7 @@ import { Groupchat } from '@/types/slices/user';
 import GroupChatAvatar from './groupchat-avatar';
 import { helpers } from '@/utils/helpers';
 import useAuth from '@/context/useAuth';
+import { Image } from 'expo-image';
 
 const GroupChatItem = ({
   item,
@@ -35,13 +36,19 @@ const GroupChatItem = ({
       }}
       style={{ height: 50 }}
       className="flex-row items-center gap-4">
-      <GroupChatAvatar
-        names={item.groupMembers.map((m) => m.user.name)}
-        width={35}
-        containerWidth={45}
-      />
-      <View className="h-full justify-center">
-        <Text className="text-base font-bold text-white">{item.name}</Text>
+      {item.photo ? (
+        <Image source={{ uri: item.photo }} style={{ width: 45, height: 45, borderRadius: 45 }} />
+      ) : (
+        <GroupChatAvatar
+          names={item.groupMembers.map((m) => m.user.name)}
+          width={35}
+          containerWidth={45}
+        />
+      )}
+      <View className="h-full flex-1 justify-center">
+        <Text className="text-base font-bold text-white" numberOfLines={1} ellipsizeMode="tail">
+          {item.name}
+        </Text>
         {item.isTyping ? (
           <Text className="text-sm text-white">{item.typingUser} is typing...</Text>
         ) : (

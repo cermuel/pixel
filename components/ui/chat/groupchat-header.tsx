@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Groupchat, GroupMember } from '@/types/slices/user';
 import GroupChatAvatar from './groupchat-avatar';
+import { Image } from 'expo-image';
 
 const GroupchatHeader = ({
   name,
@@ -26,7 +27,15 @@ const GroupchatHeader = ({
           <Ionicons name="chevron-back" size={20} color={'white'} />
         </TouchableOpacity>
 
-        <GroupChatAvatar names={members.map((m) => m.user.name)} width={35} containerWidth={45} />
+        {groupchat.photo ? (
+          <Image
+            source={{ uri: groupchat.photo }}
+            style={{ width: 45, height: 45, borderRadius: 45 }}
+          />
+        ) : (
+          <GroupChatAvatar names={members.map((m) => m.user.name)} width={35} containerWidth={45} />
+        )}
+
         <TouchableOpacity
           onPress={() => {
             router.push({

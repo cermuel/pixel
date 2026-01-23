@@ -64,7 +64,7 @@ const CreateGroupScreenComponent = () => {
         style={{ paddingTop: 20, padding: 24 }}
         className="z-10 w-full flex-row items-center justify-between">
         <>
-          <TouchableOpacity onPress={handleBack} className="w-14">
+          <TouchableOpacity onPress={handleBack} className="w-20">
             <Text className="text-lg font-medium text-white">Back</Text>
           </TouchableOpacity>
           <Text className="text-lg font-bold text-white">
@@ -72,12 +72,12 @@ const CreateGroupScreenComponent = () => {
           </Text>
 
           {submitting ? (
-            <View className="w-14 items-center justify-center">
+            <View className="w-20 items-center justify-center">
               <ActivityIndicator size={16} color={'#ca8a04'} />
             </View>
           ) : (
             <Text
-              className="w-14 text-lg font-bold text-yellow-600 disabled:text-[#555]"
+              className="w-20 text-right text-lg font-bold text-yellow-600 disabled:text-[#555]"
               onPress={handleNext}
               disabled={selectedUser.length == 0 || submitting || (step == 'create' && name == '')}>
               {step == 'add' ? 'Next' : ' Create'}

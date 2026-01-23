@@ -1,6 +1,8 @@
 import { Reaction } from '@/types/chat-socket';
 import { GetSinglePhotoResponse } from '@/types/slices/search';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
 
 const generateSimilarQuery = (photo: GetSinglePhotoResponse) => {
   const tagTitles = photo.tags.map((tag) => tag.title).join(' ');
@@ -114,6 +116,18 @@ const groupReactions = (reactions: Reaction[]) => {
   return Object.values(grouped);
 };
 
+const convertToBase64 = async (imageUri: string) => {
+  const manipResult = await ImageManipulator.manipulateAsync(
+    imageUri,
+    [{ resize: { width: 800 } }], // Resize to reasonable width
+    { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+  );
+
+  const file = new FileSystem.File(manipResult.uri);
+  const base64 = await file.base64();
+  return base64;
+};
+
 export const helpers = {
   generateSimilarQuery,
   generateId,
@@ -124,4 +138,5 @@ export const helpers = {
   isFetchBaseQueryError,
   formatChatTime,
   groupReactions,
+  convertToBase64,
 };
