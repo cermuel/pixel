@@ -282,27 +282,27 @@ export function BottomSheet({
           </TouchableWithoutFeedback>
           {disablePanGesture ? (
             <BottomSheetContent
-              children={children}
               title={title}
               style={style}
               rBottomSheetStyle={rBottomSheetStyle}
               cardColor={cardColor}
               mutedColor={mutedColor}
               onHandlePress={() => runOnJS(handlePress)()}
-              isTransparent={isTransparent}
-            />
+              isTransparent={isTransparent}>
+              {children}
+            </BottomSheetContent>
           ) : (
             <GestureDetector gesture={gesture}>
               <BottomSheetContent
-                children={children}
                 title={title}
                 style={style}
                 rBottomSheetStyle={rBottomSheetStyle}
                 cardColor={cardColor}
                 mutedColor={mutedColor}
                 onHandlePress={() => runOnJS(handlePress)()}
-                isTransparent={isTransparent}
-              />
+                isTransparent={isTransparent}>
+                {children}
+              </BottomSheetContent>
             </GestureDetector>
           )}
         </Animated.View>
