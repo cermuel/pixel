@@ -18,6 +18,7 @@ import { useSingleGroupQuery } from '@/services/user/userSlice';
 import GroupchatDetailsMember from '../ui/chat/groupchat-details-member';
 import GroupchatActionButtons from '../ui/chat/groupchat-action-buttons';
 import GroupchatMemberSheet from '../ui/chat/groupchat-member-sheet';
+import { Image } from 'expo-image';
 
 const GroupchatDetailsScreen = () => {
   const { groupchat: groupchatString } = useLocalSearchParams();
@@ -49,6 +50,17 @@ const GroupchatDetailsScreen = () => {
         pathname: '/add-to-group',
         params: { groupchat: JSON.stringify(groupchat) },
       });
+    } else if (button.action == 'search') {
+      router.push({
+        pathname: '/groupchat-message',
+        params: {
+          id: groupchat.id,
+          name: groupchat.name,
+          members: JSON.stringify(groupchat.groupMembers),
+          groupchat: JSON.stringify(groupchat),
+          isSearch: 'true',
+        },
+      });
     }
   };
 
@@ -69,7 +81,7 @@ const GroupchatDetailsScreen = () => {
             inputRange: [0, 1],
             outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.3)'],
           }),
-          paddingTop: insets.top,
+          paddingTop: insets.top + 20,
         }}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -78,7 +90,12 @@ const GroupchatDetailsScreen = () => {
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-white">Group info</Text>
         <TouchableOpacity
-          onPress={() => router.replace('/auth')}
+          onPress={() =>
+            router.push({
+              pathname: '/edit-group',
+              params: { groupchat: JSON.stringify(groupchat) },
+            })
+          }
           className="h-10 w-10 items-center justify-center ">
           <Ionicons name="pencil-sharp" size={20} color="white" />
         </TouchableOpacity>
@@ -93,12 +110,19 @@ const GroupchatDetailsScreen = () => {
         }}
         showsVerticalScrollIndicator={false}>
         <View className="mx-auto">
-          <GroupChatAvatar
-            width={80}
-            containerWidth={100}
-            position={12}
-            names={groupchat.groupMembers.map((m) => m.user.name)}
-          />
+          {groupchat.photo ? (
+            <Image
+              source={{ uri: groupchat.photo }}
+              style={{ width: 100, height: 100, borderRadius: 100 }}
+            />
+          ) : (
+            <GroupChatAvatar
+              width={80}
+              containerWidth={100}
+              position={12}
+              names={groupchat.groupMembers.map((m) => m.user.name)}
+            />
+          )}
         </View>
 
         <Text className="mt-4 w-full flex-1 text-center text-2xl font-bold text-white">
@@ -114,7 +138,7 @@ const GroupchatDetailsScreen = () => {
         </View>
         <View className="mt-4 rounded-xl bg-[#212121] p-4">
           {groupchat.groupMembers.map((member) => (
-            <GroupchatDetailsMember member={member} setMember={setMember} />
+            <GroupchatDetailsMember member={member} setMember={setMember} key={member.id} />
           ))}
         </View>
         {selectedMember && member && (

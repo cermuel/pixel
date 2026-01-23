@@ -113,7 +113,7 @@ const MessageScreenComponent = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top / 2}>
         <View className="relative flex-1">
-          <MessageHeader name={name as string} />
+          <MessageHeader name={name as string} id={Number(id)} />
           <FlatList
             inverted
             className="flex-1"

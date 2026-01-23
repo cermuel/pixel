@@ -25,6 +25,7 @@ const useGroupChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<Groupch
         });
       });
     };
+
     const handleTyping = (typingData: { name: string; userId: number; roomId: number }) => {
       setChats((prev) => {
         return prev.map((c) => {
@@ -87,6 +88,7 @@ const useGroupChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<Groupch
         });
       });
     };
+
     const handleMember = (data: { member: GroupMember; status: 'ADDED' | 'REMOVED' }) => {
       setChats((prev) => {
         return prev.map((c) => {
@@ -108,12 +110,31 @@ const useGroupChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<Groupch
         });
       });
     };
+
+    const handleGroupchatEdited = (groupchat: Groupchat) => {
+      setChats((prev) => {
+        return prev.map((c) => {
+          if (c.id != groupchat.id) return c;
+
+          const updatedChat: Groupchat = {
+            ...c,
+            name: groupchat.name || c.name,
+            photo: groupchat.photo || c.photo,
+            updatedAt: groupchat.updatedAt || c.updatedAt,
+          };
+
+          return updatedChat;
+        });
+      });
+    };
+
     socket.on(GC_EVENTS.ON.NEW_MESSAGE, handleNewMessage);
     socket.on(GC_EVENTS.ON.USER_TYPING, handleTyping);
     socket.on(GC_EVENTS.ON.USER_STOPPED_TYPING, handleTypingStopped);
     socket.on(GC_EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
     socket.on(GC_EVENTS.ON.GC_ADMIN_UPDATED, handleAdmin);
     socket.on(GC_EVENTS.ON.GC_MEMBER_UPDATED, handleMember);
+    socket.on(GC_EVENTS.ON.GC_GROUPCHAT_EDITED, handleGroupchatEdited);
     return () => {
       socket.off(GC_EVENTS.ON.NEW_MESSAGE, handleNewMessage);
       socket.off(GC_EVENTS.ON.USER_TYPING, handleTyping);
@@ -121,6 +142,7 @@ const useGroupChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<Groupch
       socket.off(GC_EVENTS.ON.MESSAGE_DELETED, handleMessageDeleted);
       socket.off(GC_EVENTS.ON.GC_ADMIN_UPDATED, handleAdmin);
       socket.off(GC_EVENTS.ON.GC_MEMBER_UPDATED, handleMember);
+      socket.off(GC_EVENTS.ON.GC_GROUPCHAT_EDITED, handleGroupchatEdited);
     };
   }, [socket, setChats]);
 
@@ -189,7 +211,21 @@ const useGroupChat = ({ setChats }: { setChats?: Dispatch<SetStateAction<Groupch
     );
   };
 
-  return { joinRoom, makeAdmin, removeAdmin, addMember, removeMember };
+  const editRoom = (
+    { roomId, name, photo }: { roomId: number; name: string; photo?: string },
+    callback: (groupchat: Groupchat | null) => void
+  ): void => {
+    if (!socket) {
+      callback(null);
+      return;
+    }
+
+    socket.emit(GC_EVENTS.EMIT.GC_EDIT_GROUPCHAT, { roomId, name, photo }, (data: Groupchat) => {
+      callback(data);
+    });
+  };
+
+  return { joinRoom, editRoom, makeAdmin, removeAdmin, addMember, removeMember };
 };
 
 export default useGroupChat;

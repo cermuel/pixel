@@ -145,6 +145,7 @@ interface GroupData {
 export interface Groupchat {
   id: number;
   name: string;
+  photo: string;
   description: string | null;
   createdAt: string;
   updatedAt: string | null;
